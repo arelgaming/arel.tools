@@ -1,14 +1,475 @@
 ---
+import Mark from '../components/Mark.astro';
+const discordUrl = import.meta.env.PUBLIC_DISCORD_INVITE_URL ?? '#';
+const patreonUrl = import.meta.env.PUBLIC_PATREON_URL ?? null;
 ---
 
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Arel — WoW Raid Management</title>
-  </head>
-  <body>
-    <h1>Arel</h1>
-    <p>WoW raid management platform. Coming soon.</p>
-  </body>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arel.tools — WoW Raid Lead Tools</title>
+  <meta name="description" content="One connected system — from the calendar to the pull. Raid signup, roster management, in-game data, and attendance tracking for World of Warcraft raid leads."/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0d0f;
+      --bg2: #111317;
+      --bg3: #161820;
+      --surface: #1a1d24;
+      --border: #2a2d36;
+      --silver: #b8bfcc;
+      --silver-lt: #d4dae6;
+      --silver-dk: #6e7585;
+      --text: #e8ecf2;
+      --muted: #8a909e;
+      --rune: #7a8499;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(180,195,215,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(180,195,215,.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(12,13,15,.95) 0%, transparent 100%);
+      backdrop-filter: blur(2px);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-wordmark {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: .12em;
+      color: var(--silver-lt);
+      text-transform: uppercase;
+    }
+
+    .nav-wordmark span {
+      color: var(--silver-dk);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: var(--silver-lt); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-cta {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--silver);
+      padding: 0 20px;
+      height: 37px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .25s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-cta:hover {
+      border-color: var(--silver);
+      color: var(--silver-lt);
+      box-shadow: 0 0 20px rgba(180,195,215,.12);
+    }
+
+    .nav-patreon {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--silver);
+      width: 37px;
+      height: 37px;
+      cursor: pointer;
+      transition: all .25s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-patreon:hover {
+      border-color: var(--silver);
+      color: var(--silver-lt);
+      box-shadow: 0 0 20px rgba(180,195,215,.12);
+    }
+
+    .nav-patreon svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      z-index: 1;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(150,170,200,.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-mark {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp .8s ease forwards .1s;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--silver-dk);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp .8s ease forwards .2s;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-weight: 900;
+      font-size: clamp(48px, 8vw, 96px);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      line-height: 1;
+      background: linear-gradient(160deg, #e8ecf2 30%, #7a8499 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeUp .9s ease forwards .3s;
+    }
+
+    .hero-domain {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(13px, 2vw, 17px);
+      letter-spacing: .35em;
+      color: var(--silver-dk);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp .8s ease forwards .45s;
+    }
+
+    .hero-tagline {
+      font-size: clamp(16px, 2.5vw, 21px);
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp .8s ease forwards .55s;
+    }
+
+    .hero-tagline em { font-style: normal; color: var(--silver); }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp .8s ease forwards .7s;
+    }
+
+    /* BUTTONS */
+    .btn-primary {
+      background: var(--silver);
+      color: var(--bg);
+      border: none;
+      padding: 14px 36px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .25s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      background: var(--silver-lt);
+      box-shadow: 0 0 32px rgba(180,195,215,.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 14px 36px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .25s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--silver-dk);
+      color: var(--silver);
+    }
+
+    /* CTA BAND */
+    section { position: relative; z-index: 1; }
+
+    .cta-band {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 48px;
+    }
+
+    .cta-inner {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-inner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(180,195,215,.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-headline {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 700;
+      color: var(--silver-lt);
+      margin-bottom: 14px;
+      letter-spacing: .04em;
+    }
+
+    .cta-sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--silver-dk);
+    }
+
+    .footer-rl {
+      font-size: 12px;
+      letter-spacing: .2em;
+      color: var(--rune);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    .footer-links a:hover { color: var(--silver); }
+
+    /* ANIMATION */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .cta-band { padding: 0 24px; }
+      .cta-inner { padding: 40px 32px; }
+      footer {
+        flex-direction: column;
+        gap: 20px;
+        padding: 40px 24px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <Mark size={36} />
+    <div class="nav-wordmark">Arel <span>· tools</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Signups</a></li>
+    <li><a href="#">Roster</a></li>
+    <li><a href="#">Encounters</a></li>
+    <li><a href="#">Attendance</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href={discordUrl} class="nav-cta">Join Discord &middot; Beta</a>
+    {patreonUrl && (
+      <a href={patreonUrl} class="nav-patreon" title="Support on Patreon">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.82 2.41C11.53 2.41 8.85 5.1 8.85 8.39c0 3.28 2.68 5.95 5.97 5.95 3.28 0 5.95-2.67 5.95-5.95 0-3.29-2.67-5.98-5.95-5.98zM2 21.6h3.5V2.41H2V21.6z"/>
+        </svg>
+      </a>
+    )}
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-mark">
+    <Mark size={80} />
+  </div>
+  <p class="eyebrow">Raid Lead Tools &nbsp;·&nbsp; Less admin, more action</p>
+  <h1>Arel</h1>
+  <p class="hero-domain">arel.tools</p>
+  <p class="hero-tagline">One connected system —<br><em>from the calendar to the pull.</em></p>
+</section>
+
+<section class="cta-band">
+  <div class="cta-inner">
+    <h2 class="cta-headline">A passion project for the<br/>World of Warcraft raiding community.</h2>
+    <p class="cta-sub">Arel is early — the app is in active development and the Discord is just getting started.<br>If this sounds like a project you're interested in, come help shape it.</p>
+    <div class="cta-actions">
+      <a href={discordUrl} class="btn-primary">Join Discord &middot; Beta</a>
+      {patreonUrl && <a href={patreonUrl} class="btn-secondary">Support on Patreon</a>}
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <div class="footer-logo">Arel · Tools</div>
+    <div class="footer-rl">Raid Lead Tools</div>
+  </div>
+  <ul class="footer-links">
+    <li><a href={discordUrl}>Discord</a></li>
+    {patreonUrl && <li><a href={patreonUrl}>Patreon</a></li>}
+    {/* TODO: restore when ready */}
+    {/* <li><a href="#">Addons</a></li> */}
+    {/* <li><a href="#">Docs</a></li> */}
+    {/* <li><a href="#">Contact</a></li> */}
+  </ul>
+</footer>
+
+</body>
 </html>

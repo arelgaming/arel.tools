@@ -1,0 +1,33 @@
+---
+interface Props {
+  size?: number;
+}
+const { size = 36 } = Astro.props;
+
+// Nav-size stroke weights (at size 36 → 108 viewBox, scale proportionally)
+const isHero = size >= 60;
+const outerStroke = isHero ? 2 : 3;
+const innerStroke = isHero ? 1.5 : 2.5;
+const diagStroke = isHero ? 1.5 : 2;
+const cornerStroke = isHero ? 2 : 2.5;
+const centerRingStroke = isHero ? 1.5 : 2;
+const topCircleR = isHero ? 3.5 : 4.5;
+---
+
+<svg width={size} height={size} viewBox="0 0 108 108" fill="none">
+  <circle cx="54" cy="54" r="48" stroke="#232630" stroke-width={outerStroke} fill="none"/>
+  <line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width={diagStroke} opacity="0.03"/>
+  <line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width={diagStroke} opacity="0.03"/>
+  <circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width={innerStroke} fill="none"/>
+  <polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/>
+  <polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/>
+  <polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/>
+  <polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/>
+  <line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width={cornerStroke}/>
+  <line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width={cornerStroke}/>
+  <line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width={cornerStroke}/>
+  <line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width={cornerStroke}/>
+  <circle cx="54" cy="8" r={topCircleR} fill="#b8bfcc"/>
+  <circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width={centerRingStroke} fill="#0c0d0f"/>
+  <circle cx="54" cy="54" r="4" fill="#d4dae6"/>
+</svg>
