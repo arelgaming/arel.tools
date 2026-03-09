@@ -1,5 +1,5 @@
 <img align="right" src="docs/init/arel-logo-512.svg" width="108" />
-
+<br/>
 <h1>Arel · Tools</h1>
 <p><strong>Raid Lead Tools &mdash; Less admin, more action.</strong></p>
 <p>One connected system &mdash; from the calendar to the pull. Arel handles scheduling, signups, roster management, encounter planning, and attendance tracking for World of Warcraft guilds.</p>
