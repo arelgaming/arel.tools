@@ -1,0 +1,1 @@
+ALTER TYPE "core"."ArelRole" ADD VALUE 'GUILD_ADMIN';

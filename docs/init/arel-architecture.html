@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Arel.tools — Application Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0d0f;--bg2:#111317;--bg3:#161820;
+  --surface:#1a1d24;--border:#2a2d36;
+  --rune:#7a8499;--muted:#8a909e;--silver-dk:#6e7585;
+  --silver:#b8bfcc;--silver-lt:#d4dae6;--text:#e8ecf2;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;overflow-x:hidden}
+
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(180,195,215,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(180,195,215,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--bg2);border-right:1px solid var(--border);z-index:100;display:flex;flex-direction:column;padding:32px 0;overflow-y:auto}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 24px 28px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.sidebar-wordmark{font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:.14em;color:var(--silver-lt);text-transform:uppercase}
+.sidebar-wordmark span{display:block;font-size:10px;color:var(--silver-dk);font-weight:400;letter-spacing:.3em;margin-top:2px}
+.sidebar-sections{list-style:none;padding:0 12px}
+.sidebar-sections li a{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-left:2px solid transparent;transition:all .2s}
+.sidebar-sections li a:hover,.sidebar-sections li a.active{color:var(--silver);border-left-color:var(--silver-dk)}
+.sidebar-sections li a .num{font-family:'Cinzel',serif;font-size:9px;color:var(--border);width:16px;flex-shrink:0}
+.sidebar-sections .group{padding:16px 12px 4px;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--border)}
+
+/* Main */
+main{margin-left:240px;position:relative;z-index:1;min-height:100vh}
+
+/* Cover */
+.cover{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:80px;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.cover-glow{position:absolute;top:0;right:0;width:700px;height:500px;background:radial-gradient(ellipse at 70% 30%,rgba(150,170,200,.06) 0%,transparent 65%);pointer-events:none}
+.cover-eyebrow{font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--silver-dk);margin-bottom:16px}
+.cover-title{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(40px,5vw,72px);letter-spacing:.06em;text-transform:uppercase;line-height:1;background:linear-gradient(150deg,#e8ecf2 30%,#7a8499 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.cover-sub{font-size:15px;color:var(--muted);max-width:560px;line-height:1.8;margin-bottom:40px}
+.cover-meta{display:flex;gap:32px;flex-wrap:wrap}
+.cover-meta-item{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rune)}
+.cover-meta-item span{display:block;color:var(--silver-dk);margin-top:4px}
+
+/* Sections */
+.section{padding:80px;border-bottom:1px solid var(--border)}
+.section-header{margin-bottom:48px}
+.section-header-row{display:flex;align-items:baseline;gap:16px}
+.section-num{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.3em;color:var(--border)}
+.section-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--silver-lt);letter-spacing:.06em;text-transform:uppercase}
+.section-rule{flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent);margin-left:16px;align-self:center}
+
+/* Limit meta labels */
+.limit-meta{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.limit-meta-row{display:flex;gap:8px;align-items:baseline;font-size:11px;white-space:nowrap}
+.limit-meta-label{color:var(--border);letter-spacing:.1em;text-transform:uppercase;min-width:52px;flex-shrink:0}
+.limit-meta-value{color:var(--silver-dk);display:flex;flex-direction:column;gap:2px}
+
+
+.sub{margin-bottom:48px}
+.sub-title{font-family:'Cinzel',serif;font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--silver-dk);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.body-text{font-size:14px;color:var(--muted);line-height:1.8;max-width:720px;margin-bottom:12px}
+.body-text strong{color:var(--silver);font-weight:500}
+
+/* Tables */
+.kv-table{width:100%;border-collapse:collapse;margin-bottom:24px;max-width:860px}
+.kv-table tr{border-bottom:1px solid var(--border)}
+.kv-table tr:last-child{border-bottom:none}
+.kv-table td{padding:10px 16px;font-size:13px;vertical-align:top}
+.kv-table td:first-child{width:220px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--rune);white-space:nowrap;padding-right:24px}
+.kv-table td:last-child{color:var(--muted);line-height:1.7}
+.kv-table td:last-child strong{color:var(--silver-lt);font-weight:500}
+.kv-table td:last-child code{font-family:'Courier New',monospace;font-size:11px;color:#9ab;background:var(--bg3);padding:1px 5px;border:1px solid var(--border)}
+
+/* Wide table with headers */
+.data-table{width:100%;border-collapse:collapse;margin-bottom:24px;max-width:960px}
+.data-table th{padding:8px 16px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rune);text-align:left;border-bottom:1px solid var(--silver-dk);font-weight:400;font-family:'Cinzel',serif}
+.data-table td{padding:10px 16px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+.data-table td:first-child{white-space:nowrap}
+.data-table tr:last-child td{border-bottom:none}
+.data-table td strong{color:var(--silver-lt);font-weight:500}
+.data-table td code{font-family:'Courier New',monospace;font-size:11px;color:#9ab;background:var(--bg3);padding:1px 5px;border:1px solid var(--border)}
+
+/* Code blocks */
+.code-block{background:var(--bg3);border:1px solid var(--border);padding:20px 24px;font-family:'Courier New',monospace;font-size:12px;color:#9ab;line-height:1.7;margin-bottom:24px;max-width:860px;overflow-x:auto;white-space:pre}
+
+/* Tree */
+.tree{background:var(--bg3);border:1px solid var(--border);padding:20px 24px;font-family:'Courier New',monospace;font-size:12px;color:var(--muted);line-height:1.9;margin-bottom:24px;max-width:720px;white-space:pre}
+.tree .dir{color:var(--silver)}
+.tree .comment{color:var(--border)}
+
+/* Rule callout */
+.rules-list{max-width:720px;margin-bottom:24px}
+.rule-item{display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.6;align-items:flex-start}
+.rule-item:last-child{border-bottom:none}
+.rule-num{font-family:'Cinzel',serif;font-size:10px;color:var(--border);width:20px;flex-shrink:0;padding-top:3px}
+.rule-item strong{color:var(--silver);font-weight:500}
+
+/* Diagram box */
+.diagram{background:var(--bg3);border:1px solid var(--border);padding:32px;margin-bottom:24px;max-width:860px;font-family:'Courier New',monospace;font-size:12px;color:var(--muted);line-height:2;white-space:pre;overflow-x:auto}
+
+/* Pill badges */
+.badge{display:inline-block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;padding:2px 8px;border:1px solid var(--border);color:var(--rune);font-family:'Cinzel',serif;margin-right:4px}
+.badge.green{color:#6aaa64;border-color:#6aaa64}
+.badge.red{color:#c27070;border-color:#c27070}
+.badge.blue{color:#7a9ab5;border-color:#7a9ab5}
+
+/* Section intro */
+.section-intro{font-size:14px;color:var(--muted);max-width:660px;line-height:1.8;margin-bottom:40px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+.section-sub{font-size:13px;color:var(--silver-dk);max-width:660px;line-height:1.7;margin-top:10px;margin-bottom:0;letter-spacing:.01em}
+.ttl{display:block;margin-top:6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--silver-dk);font-family:'Cinzel',serif}
+
+/* Deferred list */
+.deferred{background:var(--surface);border:1px solid var(--border);padding:24px 32px;max-width:720px;margin-bottom:24px}
+.deferred-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--silver-dk);margin-bottom:16px}
+.deferred li{font-size:13px;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);list-style:none;line-height:1.6}
+.deferred li:last-child{border-bottom:none}
+.deferred li::before{content:'— ';color:var(--border)}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-wordmark">Arel<span>Architecture Doc</span></div>
+  </div>
+  <ul class="sidebar-sections">
+    <li class="group">Overview</li>
+    <li><a href="#s01"><span class="num">01</span>What Is Arel</a></li>
+    <li><a href="#s02"><span class="num">02</span>Stack</a></li>
+    <li><a href="#s03"><span class="num">03</span>Repo Structure</a></li>
+    <li><a href="#s04"><span class="num">04</span>Deployment Phases</a></li>
+    <li class="group">Infrastructure</li>
+    <li><a href="#s05"><span class="num">05</span>Hosting & Services</a></li>
+    <li><a href="#s06"><span class="num">06</span>Database</a></li>
+    <li><a href="#s07"><span class="num">07</span>Redis</a></li>
+    <li class="group">Access Control</li>
+    <li><a href="#s08"><span class="num">08</span>Auth & Sessions</a></li>
+    <li><a href="#s09"><span class="num">09</span>Service Identity</a></li>
+    <li><a href="#s10"><span class="num">10</span>Feature & Plan Gates</a></li>
+    <li><a href="#s10"><span class="num">11</span>Usage Limits</a></li>
+    <li class="group">Services</li>
+    <li><a href="#s11"><span class="num">12</span>API Service</a></li>
+    <li><a href="#s12"><span class="num">13</span>Bot</a></li>
+    <li><a href="#s13"><span class="num">14</span>Background Jobs</a></li>
+    <li><a href="#s14"><span class="num">15</span>Admin UI</a></li>
+    <li class="group">Product</li>
+    <li><a href="#s15"><span class="num">16</span>Plans</a></li>
+    <li><a href="#s16"><span class="num">17</span>Supporter Model</a></li>
+    <li><a href="#s17"><span class="num">18</span>Data Lifecycle</a></li>
+    <li><a href="#s18"><span class="num">19</span>Integrations</a></li>
+    <li><a href="#s19"><span class="num">20</span>Architectural Rules</a></li>
+    <li class="group">Reference</li>
+    <li><a href="#s20"><span class="num">21</span>Deferred Decisions</a></li>
+    <li><a href="#s22"><span class="num">22</span>Open Items</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="cover" id="cover">
+    <div class="cover-glow"></div>
+    <div class="cover-eyebrow">Arel.tools — Internal Technical Document</div>
+    <div class="cover-title">Application<br>Architecture</div>
+    <div class="cover-sub">Complete system design for the Arel raid management platform — repo structure, infrastructure, access control, service topology, and implementation rules.</div>
+    <div class="cover-meta">
+      <div class="cover-meta-item">Version<span>1.0</span></div>
+      <div class="cover-meta-item">Status<span>Approved</span></div>
+      <div class="cover-meta-item">Date<span>March 2026</span></div>
+      <div class="cover-meta-item">Environments<span>Local · Preview · Production</span></div>
+    </div>
+  </div>
+
+  <!-- 01 What Is Arel -->
+  <section class="section" id="s01">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">01</span>
+        <h2 class="section-title">What Is Arel</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text">Arel is a <strong>World of Warcraft raid management platform</strong>. It plugs directly into Discord, putting scheduling, roster, strats, and attendance in one place — so your team spends less time on admin and more time pulling.</div>
+    <div class="body-text">The four core product areas:</div>
+    <table class="kv-table">
+      <tr><td>Scheduling &amp; Signup</td><td>Post raid nights, set lockout windows, collect signups via web or Discord. Recurring schedules and automatic reminders available on Supporter plan.</td></tr>
+      <tr><td>Roster</td><td>Manage specs, roles, and availability. Build your roster from signups. Bench and standby management built in. Automated roster suggestions on Supporter plan.</td></tr>
+      <tr><td>Encounter Planning</td><td>Share strats and assign roles per encounter. Accessible on web and in-game via addon before the pull.</td></tr>
+      <tr><td>Attendance &<br>Bench Tracking</td><td>Attendance pulled automatically from Warcraft Logs — no manual marking after raids. Per-raider history persists across weeks. Bench and standby appearances tracked alongside raid appearances for roster decisions and trial raider evaluation.</td></tr>
+    </table>
+    <div class="body-text">Each guild operates in its own fully isolated space. The Discord guild is the tenant unit — membership, roles, and permissions flow from Discord into Arel.</div>
+  </section>
+
+  <!-- 02 Stack -->
+  <section class="section" id="s02">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">02</span>
+        <h2 class="section-title">Stack</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <table class="data-table">
+      <tr><th>Concern</th><th>Choice</th><th>Notes</th></tr>
+      <tr><td><strong>App framework</strong></td><td>Next.js 15 (App Router)</td><td>Deployed on Vercel</td></tr>
+      <tr><td><strong>Marketing site</strong></td><td>Astro (hybrid mode)</td><td>Separate Vercel project, same monorepo</td></tr>
+      <tr><td><strong>Bot</strong></td><td>Discord.js</td><td>Persistent service on Northflank</td></tr>
+      <tr><td><strong>API layer</strong></td><td>tRPC</td><td>Standalone service on Northflank; web + bot are consumers</td></tr>
+      <tr><td><strong>ORM</strong></td><td>Prisma</td><td>Multi-schema; only imported by <code>apps/api</code></td></tr>
+      <tr><td><strong>Auth</strong></td><td>NextAuth v5 (Auth.js)</td><td>Discord OAuth; Google OAuth for admin UI</td></tr>
+      <tr><td><strong>UI components</strong></td><td>shadcn/ui</td><td>Customised to Arel brand tokens</td></tr>
+      <tr><td><strong>Styling</strong></td><td>Tailwind CSS</td><td>Shared config across all apps via <code>packages/ui</code></td></tr>
+      <tr><td><strong>Monorepo</strong></td><td>Turborepo</td><td>Single repo, independent deployments per app</td></tr>
+      <tr><td><strong>Background jobs</strong></td><td>Inngest</td><td>Workers on Northflank; events published from Vercel or bot</td></tr>
+      <tr><td><strong>Feature flags</strong></td><td>Flagsmith</td><td>Phase 1: cloud free tier. Phase 2: self-hosted on Northflank, wrapped behind internal interface. See <a href="#s04">Deployment Phases</a>.</td></tr>
+      <tr><td><strong>Supporter sync</strong></td><td>Patreon OAuth + webhooks</td><td>Users connect Patreon via OAuth. Pledge status verified via Patreon API. Webhooks primary; nightly Patreon API poll as safety net. No payment processing in Arel — Patreon handles billing entirely.</td></tr>
+      <tr><td><strong>Time-series</strong></td><td>TimescaleDB (Neon extension)</td><td>Hypertables on <code>analytics</code> schema tables and <code>usage.usage_events</code> — partitioned by time, no compression (Apache-2 feature only on Neon). <code>usage.usage_history</code> is a plain table.</td></tr>
+    </table>
+  </section>
+
+  <!-- 03 Repo Structure -->
+  <section class="section" id="s03">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">03</span>
+        <h2 class="section-title">Repo Structure</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Monorepo Layout</div>
+      <div class="tree"><span class="dir">repo/</span>
+  <span class="dir">apps/</span>
+    <span class="dir">app/</span>          <span class="comment">→ Next.js 15  (app.arel.tools)        — Vercel</span>
+    <span class="dir">www/</span>          <span class="comment">→ Astro hybrid (www.arel.tools)        — Vercel (separate project)</span>
+    <span class="dir">api/</span>          <span class="comment">→ tRPC API service                     — Northflank</span>
+    <span class="dir">bot/</span>          <span class="comment">→ Discord.js bot                       — Northflank</span>
+    <span class="dir">admin/</span>        <span class="comment">→ Next.js internal admin UI            — Northflank or Vercel</span>
+  <span class="dir">packages/</span>
+    <span class="dir">db/</span>           <span class="comment">→ Prisma schema + client  (ONLY imported by apps/api)</span>
+    <span class="dir">trpc/</span>         <span class="comment">→ Router definitions, shared procedure middleware</span>
+    <span class="dir">auth/</span>         <span class="comment">→ NextAuth configs, session types, token validation</span>
+    <span class="dir">config/</span>       <span class="comment">→ Feature flag resolution, plan limit + benefit logic, usage limit enforcement (single entry point)</span>
+    <span class="dir">ui/</span>           <span class="comment">→ shadcn components, Arel design system, Tailwind config</span>
+    <span class="dir">types/</span>        <span class="comment">→ Shared TypeScript types across all apps</span>
+    <span class="dir">utils/</span>        <span class="comment">→ Shared utility functions</span></div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Hard Boundaries</div>
+      <div class="rules-list">
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>packages/db is imported only by apps/api.</strong> Enforced via ESLint import boundary rule. Web app, bot, and admin never touch Prisma directly.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>All business logic lives in apps/api.</strong> apps/app and apps/bot are consumers of the API, not owners of data.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>packages/ui is the single source of brand.</strong> Both apps/app and apps/www import components from here. Brand tokens never duplicated.</div></div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Deployment Targets</div>
+      <table class="kv-table">
+        <tr><td>apps/app</td><td>Vercel project 1 — <code>app.arel.tools</code></td></tr>
+        <tr><td>apps/www</td><td>Vercel project 2 — <code>www.arel.tools</code></td></tr>
+        <tr><td>apps/api</td><td>Northflank persistent service</td></tr>
+        <tr><td>apps/bot</td><td>Northflank persistent service</td></tr>
+        <tr><td>apps/admin</td><td>Northflank (or locked-down Vercel project)</td></tr>
+        <tr><td>Flagsmith</td><td>Northflank persistent service + its own Postgres</td></tr>
+        <tr><td>Inngest workers</td><td>Northflank, triggered by events from Vercel or bot</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 04 Deployment Phases -->
+  <section class="section" id="s04">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">04</span>
+        <h2 class="section-title">Deployment Phases</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Two deployment topologies — launch configuration and production split. The architecture is identical in both; only the process boundary changes.</div>
+    </div>
+    <div class="section-intro">The rest of this document describes the <strong>Phase 2 (Split)</strong> topology — three separate containers with private networking. Phase 1 collapses those containers into one process to minimise cost and operational overhead at launch. The code architecture, schema, procedure hierarchy, and all other decisions are identical in both phases. Splitting is a deployment config change plus one code change — not a migration.</div>
+    <div class="sub">
+      <div class="sub-title">Phase 1 — Launch (Single Process)</div>
+      <div class="body-text"><code>apps/api</code>, <code>apps/bot</code>, and the Inngest worker handler run as a single Node.js process in one container. The bot calls tRPC procedures in-process (direct function call — no HTTP hop). All import boundaries and business logic rules still apply — the monorepo package structure enforces them at the code level regardless of process topology.</div>
+      <table class="kv-table">
+        <tr><td>Container host</td><td>Railway or Fly.io — one container, one deploy.</td></tr>
+        <tr><td>Vercel</td><td>Hobby tier — free. Custom domains now supported.</td></tr>
+        <tr><td>Neon</td><td>Free tier — autosuspend after 5 min inactivity. Cold start ~500ms–1s. Acceptable at low guild count; upgrade to Launch ($19/mo) when cold starts become a user complaint.</td></tr>
+        <tr><td>Flagsmith</td><td>Cloud free tier (up to 1000 flags). Eliminates a container and a DB. Swap to self-hosted in Phase 2 with a one-line config change in <code>packages/config</code>.</td></tr>
+        <tr><td>Upstash Redis</td><td>Free tier (10k requests/day). Sufficient for low guild count.</td></tr>
+        <tr><td>Service tokens</td><td>Skip inter-service token verification in Phase 1 — everything is in-process. Wire it in during Phase 2 when services become separate HTTP callers.</td></tr>
+        <tr><td>Estimated cost</td><td><strong>~$5–15/mo</strong> (Railway/Fly usage + optional Neon upgrade).</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Phase 2 — Split (Production Topology)</div>
+      <div class="body-text">Three separate containers on Northflank with private networking. Bot and worker call tRPC over HTTP via <code>TRPC_API_URL</code> env var. Flagsmith self-hosted. This is the topology described in the rest of the document.</div>
+      <table class="kv-table">
+        <tr><td>Container host</td><td>Northflank — private network, per-service scaling, preview container spin-up via GitHub Actions.</td></tr>
+        <tr><td>Vercel</td><td>Pro tier ($20/mo) — team seats, higher bandwidth limits.</td></tr>
+        <tr><td>Neon</td><td>Launch plan ($19/mo) — always-on compute, branching for preview environments.</td></tr>
+        <tr><td>Flagsmith</td><td>Self-hosted on Northflank with its own Postgres.</td></tr>
+        <tr><td>Migration effort</td><td>Three Dockerfile/service configs. Add <code>TRPC_API_URL</code> env var to bot and worker. Swap in-process tRPC calls for HTTP client calls in <code>apps/bot</code> and the worker entry point. No schema changes. No procedure changes. No Redis changes. Estimated: one day.</td></tr>
+        <tr><td>Migration trigger</td><td>When the bot or worker destabilises the API process, or when independent scaling becomes necessary.</td></tr>
+        <tr><td>Estimated cost</td><td><strong>~$80–165/mo</strong> depending on Northflank container sizing.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 05 Hosting & Services -->
+  <section class="section" id="s05">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">05</span>
+        <h2 class="section-title">Hosting & Services</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text" style="margin-bottom:32px;padding:16px 20px;border:1px solid var(--border);background:var(--bg3);max-width:720px;font-size:13px;color:var(--muted)"><strong style="color:var(--silver)">Phase 2 topology.</strong> This section describes the split production configuration. See <a href="#s04" style="color:var(--rune)">Deployment Phases</a> for the Phase 1 single-process launch setup and migration path.</div>
+    <div class="sub">
+      <div class="sub-title">Platform Responsibilities</div>
+      <table class="data-table">
+        <tr><th>Platform</th><th>Hosts</th><th>Rationale</th></tr>
+        <tr><td><strong>Vercel</strong></td><td>apps/app, apps/www</td><td>Next.js and Astro, edge network, preview deployments per PR. User-facing request/response only.</td></tr>
+        <tr><td><strong>Northflank</strong></td><td>apps/api, apps/bot, apps/admin, Flagsmith, Inngest workers</td><td>Persistent services, shared private network, container-based pricing, one platform for all non-Vercel workloads.</td></tr>
+        <tr><td><strong>Neon</strong></td><td>Primary Postgres</td><td>Direct account — not Vercel-provisioned. Independent of hosting platform. Neon branching for preview environments.</td></tr>
+        <tr><td><strong>Upstash Redis</strong></td><td>Cache, counters, pub/sub</td><td>Not Vercel KV — platform-independent, accessible from Vercel and Northflank equally.</td></tr>
+        <tr><td><strong>Cloudflare R2</strong></td><td>Files, attachments, exports</td><td>S3-compatible, no egress fees. Served directly to clients — never proxied through Vercel.</td></tr>
+        <tr><td><strong>Patreon</strong></td><td>Supporter billing</td><td>Handles all payments and pledges. Arel connects via OAuth per user and receives webhooks on pledge changes. No payment processing in Arel.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Vercel Cost Controls</div>
+      <div class="body-text">Vercel charges per function invocation, duration, and bandwidth. The following rules keep costs predictable regardless of guild or bot activity volume.</div>
+      <div class="rules-list">
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>Bot events never hit Vercel.</strong> Discord events are received and processed by apps/bot on Northflank. The bot writes results to Postgres directly via the API service.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>Webhooks handled on Northflank.</strong> Patreon and Discord webhooks go to the API service, not Vercel functions.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>Files served from R2 directly.</strong> Never proxy file content through Next.js routes.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div><strong>Paginate all API responses.</strong> No unbounded query results returned to clients.</div></div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Environments</div>
+      <table class="kv-table">
+        <tr><td>Local dev</td><td>All apps run locally. Neon <code>dev</code> branch (or local branch). Upstash dev instance. Bot pointed at the dev Discord Application — same app as preview, different process.</td></tr>
+        <tr><td>Preview</td><td>Per-PR isolation — see below.</td></tr>
+        <tr><td>Production</td><td>Full stack. All services live. Neon <code>main</code> branch. Staging to be added later.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Discord Applications — Environment Separation</div>
+      <div class="body-text">A Discord Application is a registration in Discord's developer portal — it has its own client ID, client secret, and bot token. The bot process authenticates to Discord using this token. Prod and non-prod are completely separate Discord Applications with no shared credentials.</div>
+      <table class="data-table">
+        <tr><th>Environment</th><th>Discord Application</th><th>Bot Process</th><th>Neon Branch</th></tr>
+        <tr><td><strong>Production</strong></td><td>Arel (prod) — separate app, separate token</td><td>Northflank prod service</td><td><code>main</code></td></tr>
+        <tr><td><strong>Dev / Preview</strong></td><td>Arel (dev) — shared across all non-prod</td><td>Northflank dev service — shared</td><td><code>dev</code> (bot) / PR branch (API + web)</td></tr>
+        <tr><td><strong>Local</strong></td><td>Arel (dev) — same dev app</td><td>Local process</td><td>Local or <code>dev</code></td></tr>
+      </table>
+      <div class="body-text">The dev Discord Application is installed in a dedicated Arel dev/test Discord server — not a real guild. Prod and dev bot tokens are never interchangeable. The prod bot process never touches the dev Discord Application, and vice versa.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Preview Environment — Per-PR Isolation</div>
+      <div class="body-text">Each pull request gets a fully isolated preview environment for the web app and API service. Schema migrations run against the PR's own Neon branch — never against <code>dev</code> or <code>main</code>. Parallel PRs with conflicting migrations cannot break each other.</div>
+      <table class="kv-table">
+        <tr><td>apps/app</td><td>Vercel preview deployment, auto-created per PR. Pointed at the PR's Neon branch and PR-scoped API instance.</td></tr>
+        <tr><td>apps/www</td><td>Vercel preview deployment, auto-created per PR. Mostly static — no DB dependency.</td></tr>
+        <tr><td>apps/api</td><td>Per-PR instance spun up on Northflank via GitHub Actions. Pointed at the PR's Neon branch. Migrations run against the isolated branch before the API starts.</td></tr>
+        <tr><td>Neon branch</td><td>Auto-created per PR via GitHub Actions + Neon API on PR open. <strong>Neon does not auto-delete branches</strong> — the workflow explicitly deletes the branch on PR close or merge via <code>neonctl branches delete preview/pr-{number}</code>. Without this step orphaned branches accumulate.</td></tr>
+        <tr><td>apps/bot</td><td>Shared dev Northflank instance — not spun up per PR. Uses the dev Discord Application and always points at the <code>dev</code> Neon branch. Most PRs don't touch bot behavior; per-PR bot isolation is not feasible (each would need its own Discord Application and guild installation).</td></tr>
+        <tr><td>Bot-touching PRs</td><td>PRs that change bot behavior or bot-related DB schema should be coordinated with the team and tested manually against the shared dev bot. Documented in the contributing guide.</td></tr>
+        <tr><td>Redis</td><td>Shared Upstash dev instance. Keys are guild-scoped — preview environments use test guild IDs that don't collide with each other or with dev.</td></tr>
+      </table>
+      <div class="body-text"><strong>Migration safety rule:</strong> migrations in a PR branch are isolated to that branch's Neon instance and never touch <code>dev</code> until the PR merges. The GitHub Actions workflow runs <code>prisma migrate deploy</code> against the PR branch at preview deploy time, not against the shared <code>dev</code> branch.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Service Communication Pattern</div>
+      <div class="body-text">Northflank services and Vercel are siblings sharing infrastructure — not a parent/child relationship. They do not call each other for data operations. <strong>Phase 1 note:</strong> in the single-process launch configuration, bot→API calls are in-process function calls, not HTTP — the diagram reflects the Phase 2 split topology.</div>
+      <div class="diagram">Discord ──────────────────────────────────────────────── Users
+   │                                                          │
+   ▼                                                          ▼
+Bot (Northflank)                                    Web App (Vercel)
+   │   tRPC calls                                      │   tRPC calls
+   └──────────────────────┬───────────────────────────┘
+                          │
+                    API Service
+                    (Northflank)
+                          │
+               ┌──────────┴──────────┐
+               │                     │
+           Postgres               Upstash
+           (Neon)                 (Redis)
+
+Bot → Web real-time signals:   Redis pub/sub
+Web → Bot async triggers:      Inngest events (with retry guarantees)</div>
+    </div>
+  </section>
+
+  <!-- 05 Database -->
+  <section class="section" id="s06">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">06</span>
+        <h2 class="section-title">Database</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Schema layout, multitenancy, branch strategy, and key table definitions.</div>
+    </div>
+    <div class="section-intro">Single Postgres instance on Neon. Multiple named schemas for logical separation — independent migration management, targeted access control, and clear ownership boundaries per concern.</div>
+    <div class="sub">
+      <div class="sub-title">Schema Map</div>
+      <table class="data-table">
+        <tr><th>Schema</th><th>Tables</th><th>Purpose</th></tr>
+        <tr><td><strong>core</strong></td><td>users, user_integrations, guilds, guild_members, guild_role_mappings, guild_seats, guild_integrations, guild_audit_log, subscriptions, supporter_links, guild_inactivity_warnings (schema: see Section 13 guild.inactivity-warn)</td><td>Identity, membership, per-user third-party credentials (Patreon OAuth), Discord role → app permission mappings, seat grants, per-guild third-party credentials, guild-facing configuration audit log, subscription state, supporter-to-guild links, guild lifecycle warnings</td></tr>
+        <tr><td><strong>config</strong></td><td>feature_groups, features, guild_features, plan_limits, plan_benefits, subscription_plans, guild_config_overrides, bot_config, service_tokens</td><td>Feature group hierarchy (plan catalogue and inheritance tree), GA feature definitions, Flagsmith override mirror cache, quota definitions per limit type (seed data), plan benefit definitions including data visibility (seed data), subscription plan definitions, per-guild admin overrides for both limits and benefits, bot settings, internal service identity tokens.</td></tr>
+        <tr><td><strong>usage</strong></td><td>usage_history, usage_events</td><td>Per-window snapshots (written at monthly reset), immutable per-increment event log for full auditability.</td></tr>
+        <tr><td><strong>ingested</strong></td><td>wcl_reports, wcl_attendance, wcl_kills, [future_integrations]</td><td>Data pulled from Warcraft Logs and other external APIs. One table group per integration. WCL scope is attendance and kill records only — performance analytics stay in WCL. No sync cursor — imports are report-scoped and event-driven.</td></tr>
+        <tr><td><strong>analytics</strong></td><td>events, bot_commands, api_call_log</td><td>Append-only behavioural activity data. TimescaleDB hypertables for time-series queries. Guild activity, command history, external API call log. Distinct from the <code>usage</code> schema — analytics records what users and services did; usage records quota consumption and billing events. <code>usage_events</code> is also a TimescaleDB hypertable, but lives in the usage schema because it is a billing/audit record, not a behavioural record. <code>usage_history</code> is a plain table — it grows at one row per guild per limit per usage period and does not benefit from hypertable partitioning.</td></tr>
+        <tr><td><strong>internal</strong></td><td>admin_users, audit_log, background_jobs, archived_guilds</td><td>Your team only. Full audit trail of all admin UI actions, plan/limit overrides granted by sales or support, cross-guild operations, archival and deletion events. Not exposed to guild users — see <code>core.guild_audit_log</code> for the guild-facing equivalent.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">core.users Schema</div>
+      <div class="body-text">One row per Arel user (Discord identity). Users exist independently of guilds — a user can belong to multiple guilds. User-level platform integrations (Patreon OAuth) are stored separately in <code>core.user_integrations</code>.</div>
+      <div class="code-block">-- core.users
+id                  text PRIMARY KEY   -- Arel internal user ID (UUID or CUID)
+discord_id          text UNIQUE        -- Discord snowflake — stable external identifier
+discord_username    text               -- cached for display; refreshed on login
+discord_avatar      text               -- avatar hash; refreshed on login
+patreon_member_id   text UNIQUE        -- Patreon member ID, set when user connects Patreon.
+                                       -- Used for webhook-to-user matching. Nullable until connected.
+created_at          timestamptz
+updated_at          timestamptz</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">core.user_integrations Schema</div>
+      <div class="body-text">Per-user third-party credentials. Parallel to <code>core.guild_integrations</code> but scoped to the user, not the guild. Currently used for Patreon OAuth tokens. All tokens encrypted at the application layer before writing — same pattern as guild integrations. The schema below is a working proposal — exact refresh cadence and error recovery flow are deferred to Deferred Decisions pending the user/guild/event model being finalised. Field structure and encryption pattern are settled.</div>
+      <div class="code-block">-- core.user_integrations
+id               uuid PRIMARY KEY
+user_id          text           -- FK to core.users
+integration_type text           -- 'PATREON' (only current type)
+access_token     text           -- encrypted at rest
+refresh_token    text           -- encrypted at rest, nullable
+token_expires_at timestamptz    -- nullable if non-expiring
+scopes           text[]         -- permissions granted
+status           text           -- 'ACTIVE', 'EXPIRED', 'REVOKED', 'ERROR'
+connected_at     timestamptz
+key_version      int            -- encryption key version — same rotation pattern as guild_integrations
+metadata         jsonb          -- integration-specific extras
+UNIQUE (user_id, integration_type)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">core.guilds — Activity & Data Visibility Columns</div>
+      <div class="body-text">The inactivity clock is driven by three columns on <code>core.guilds</code>, each updated independently, plus a generated column that takes the maximum. Falls back to <code>created_at</code> when all three are null — meaning the inactivity clock starts at guild creation for all guilds, including always-free ones. The full <code>core.guilds</code> schema is defined in <code>packages/db</code> — the columns shown here are those with non-obvious runtime behaviour.</div>
+      <div class="code-block">-- core.guilds (selected columns — see packages/db for full schema)
+last_web_activity_at       timestamptz   -- any tRPC mutation or meaningful web interaction
+                                         -- debounced: written at most once per hour per guild
+                                         -- gated via existing cache:guild:{guildId} Redis key
+last_bot_activity_at       timestamptz   -- any bot command or Discord event processed
+                                         -- direct write, no debounce (naturally low frequency)
+last_raid_event_updated_at timestamptz   -- any raid event created or updated
+                                         -- direct write, no debounce
+last_plan_change_at        timestamptz   -- set when plan changes (upgrade or downgrade)
+                                         -- written by guild.downgrade and supporter link creation
+                                         -- ensures inactivity clock starts from downgrade time,
+                                         -- not from the guild's last user activity
+
+-- Generated column — do not write directly
+last_activity_at           timestamptz GENERATED ALWAYS AS (
+  GREATEST(
+    COALESCE(last_web_activity_at, created_at),
+    COALESCE(last_bot_activity_at, created_at),
+    COALESCE(last_raid_event_updated_at, created_at),
+    COALESCE(last_plan_change_at, created_at)
+  )
+) STORED
+
+-- Data visibility columns (updated on plan change, new data ingestion, or daily recalculation)
+data_visible_from          timestamptz   -- cutoff date for ingested data queries
+                                         -- set to NOW() - INTERVAL '30 days' at plan-change time for Free
+                                         -- recalculated daily by data_visible_from.recalculate cron
+                                         --   to prevent window drift on guilds that stay on the same plan
+                                         -- NULL for Supporter (no filter applied)
+has_older_data             boolean       -- true if ingested data exists beyond data_visible_from
+                                         -- recalculated synchronously after data_visible_from is written
+                                         -- also recalculated after each sync.wcl completes
+                                         -- drives upgrade CTA visibility in the UI</div>
+      <div class="body-text">The debounce on <code>last_web_activity_at</code> means it may lag reality by up to one hour. This is intentional and safe — the lag only makes the timestamp appear older than it is, so the archive job would fire later than the true 90-day mark, never earlier. An active guild is never incorrectly archived.</div>
+      <div class="body-text"><code>data_visible_from</code> is used as an indexed filter on all ingested data queries: <code>WHERE occurred_at &gt;= guild.data_visible_from</code>. <code>has_older_data</code> is read by the UI to decide whether to show an upgrade CTA — "you have raid data from before your current window, support the project to see it." A daily cron (<code>data_visible_from.recalculate</code>) recalculates and writes this value for all Free-plan guilds — without it, a static timestamp set at plan-change time would drift over time, causing the window to grow rather than slide. Supporter guilds have <code>data_visible_from = NULL</code> and are excluded from this cron.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Multitenancy</div>
+      <div class="body-text">Row-level multitenancy with Postgres RLS. Every guild-scoped table carries a <code>guildId</code> column. Cross-cutting tables (<code>core.users</code>, <code>core.user_integrations</code>, <code>internal.*</code>) are not guild-scoped and are exempt from RLS guild isolation. The API service injects <code>guildId</code> from the authenticated session context on every request — it is never accepted from the client payload.</div>
+      <table class="kv-table">
+        <tr><td>Isolation model</td><td>Row-level with RLS enforced at DB layer, not just application layer</td></tr>
+        <tr><td>guildId source</td><td>Session only — injected by API context factory, never from request body</td></tr>
+        <tr><td>Cross-guild queries</td><td>Not possible from web app or bot. Internal admin and workers can operate cross-guild with elevated service role.</td></tr>
+        <tr><td>Prisma + RLS implementation</td><td>Prisma does not natively set Postgres session variables. The standard approach — and what Arel uses — is to wrap every request in a short transaction and run <code>SET LOCAL app.current_guild_id = '...' </code> as the first statement via <code>prisma.$executeRaw</code>. <code>SET LOCAL</code> scopes the variable to the transaction and does not persist across connection reuse — safe with Neon's connection pooler. The context factory (Section 11) is responsible for opening this transaction wrapper on every request before any query runs. <strong>Enforcement mechanism:</strong> a Prisma client extension (<code>$extends</code>) wraps every query in the transaction and injects the <code>SET LOCAL</code> statement — this ensures no handler can accidentally skip it. The extension is applied once in the context factory; application code never calls <code>$executeRaw</code> or opens the transaction wrapper directly.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Neon Branch Strategy</div>
+      <table class="kv-table">
+        <tr><td>main</td><td>Production database. Migrations applied on merge to main.</td></tr>
+        <tr><td>dev</td><td>Shared non-production branch. Bot always points here. Active development branch — migrations land here first, validated, then promoted to main. Never deleted.</td></tr>
+        <tr><td>preview/pr-{number}</td><td>Auto-created per PR via GitHub Actions + Neon API on PR open. API service preview instance points here. Migrations run against this branch at preview deploy time — never against dev. <strong>Explicitly deleted on PR close or merge</strong> via <code>neonctl branches delete preview/pr-{number}</code> — Neon does not auto-delete.</td></tr>
+        <tr><td>local</td><td>Developer local branches created on demand from Neon dashboard. Branched from dev.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">config.plan_benefits Schema</div>
+      <div class="body-text">Seed data. Defines the value of each numeric plan benefit per plan. One row per <code>benefit_key</code> per plan. Changes to values are seed data updates — no deploy required.</div>
+      <div class="code-block">-- config.plan_benefits  (seed data — do not write at runtime)
+benefit_key   text    -- e.g. 'DATA_VISIBILITY_DAYS'
+plan_id       text    -- FK to config.subscription_plans
+value         int     -- nullable: NULL = unlimited
+PRIMARY KEY (benefit_key, plan_id)
+
+-- Current seed data:
+-- ('DATA_VISIBILITY_DAYS', 'free',      30)
+-- ('DATA_VISIBILITY_DAYS', 'supporter', NULL)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">config.guild_config_overrides Schema</div>
+      <div class="body-text">Per-guild admin overrides for both consumable limits (<code>config.plan_limits</code>) and numeric plan benefits (<code>config.plan_benefits</code>). One active override per guild per key — upsert on change, history in <code>internal.audit_log</code>. Override persists across plan changes and is never auto-recalculated. Resolution at runtime: <code>COALESCE(override.value, plan_default)</code>.</div>
+      <div class="code-block">-- config.guild_config_overrides
+id            uuid PRIMARY KEY
+guild_id      text           -- FK to core.guilds
+config_key    text           -- matches benefit_key (plan_benefits) or limit_type (plan_limits)
+value         int            -- nullable: NULL = unlimited. Same convention as plan_benefits.
+expires_at    timestamptz    -- nullable: NULL = no expiry. Auto-expiring overrides need no cleanup.
+reason        text           -- required: why this override was granted
+granted_by    text           -- internal admin userId who wrote the override
+created_at    timestamptz
+updated_at    timestamptz    -- set on every upsert
+UNIQUE (guild_id, config_key)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Connection Pooling</div>
+      <div class="body-text">Two connection strings required for Prisma on Neon. Both provided as environment variables to all services that connect.</div>
+      <table class="kv-table">
+        <tr><td><code>DATABASE_URL</code></td><td>Neon pooled connection string — used for all runtime queries</td></tr>
+        <tr><td><code>DATABASE_DIRECT_URL</code></td><td>Neon direct connection — used only for Prisma migrations (cannot go through pooler)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 06 Redis -->
+  <section class="section" id="s07">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">07</span>
+        <h2 class="section-title">Redis</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Key namespaces, TTLs, and the rule that all Redis data is reconstructible from Postgres.</div>
+    </div>
+    <div class="body-text">Upstash Redis. All data stored in Redis must be reconstructible from Postgres if lost — Redis is a performance and coordination layer, not a source of truth.</div>
+    <div class="sub">
+      <div class="sub-title">Key Namespaces</div>
+      <table class="data-table">
+        <tr><th>Prefix</th><th>Purpose</th></tr>
+        <tr><td><code>cache:features:{guildId}</code></td><td>Resolved feature flag set for guild. Busted immediately on flag change or subscription change.<br><span class="ttl">TTL — 60s</span></td></tr>
+        <tr><td><code>cache:guild:{guildId}</code></td><td>Guild config and subscription state. Also debounces <code>last_web_activity_at</code> writes — presence of this key gates the once-per-hour DB update.<br><span class="ttl">TTL — 5 min</span></td></tr>
+        <tr><td><code>cache:permissions:{userId}:{guildId}</code></td><td>Resolved user permissions within guild. Busted immediately on seat grant/revoke, role mapping change, or bot <code>GUILD_MEMBER_UPDATE</code>.<br><span class="ttl">TTL — 5 min</span></td></tr>
+        <tr><td><code>permissions:invalidated:{guildId}</code></td><td>Timestamp written when role mappings change for a guild. API context factory compares this against session <code>iat</code> on every request — if newer, session treated as stale and client forced to re-auth. Ensures demotions propagate within one request.<br><span class="ttl">TTL — Max session lifetime (self-cleaning)</span></td></tr>
+        <tr><td><code>session:{sessionId}</code></td><td>Auth session data.<br><span class="ttl">TTL — Session lifetime</span></td></tr>
+        <tr><td><code>ratelimit:{guildId}:{endpoint}</code></td><td>API rate limiting per guild per route.<br><span class="ttl">TTL — Window expiry</span></td></tr>
+        <tr><td><code>presence:{guildId}</code></td><td>Online member tracking. Refreshed on heartbeat — expires naturally when members disconnect.<br><span class="ttl">TTL — Short, heartbeat-refreshed</span></td></tr>
+        <tr><td><code>locks:{type}:{guildId}</code></td><td>Distributed locks for sync jobs. Format: <code>locks:wcl:{guildId}</code> for WCL imports, <code>locks:sync:{integrationType}:{guildId}</code> for future integrations. Prevents concurrent sync jobs for the same guild and integration type.<br><span class="ttl">TTL — Job duration + buffer</span></td></tr>
+        <tr><td><code>pubsub:to-web:{guildId}:*</code></td><td>Bot-to-web real-time signals. Bot publishes; Vercel SSE route subscribes and pushes to client. One direction only — bot → web.<br><span class="ttl">TTL — Fire and forget</span></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 07 Auth & Sessions -->
+  <section class="section" id="s08">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">08</span>
+        <h2 class="section-title">Auth & Sessions</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Main App — Discord OAuth</div>
+      <div class="body-text">NextAuth v5 with Discord provider. Session cookie set on <code>.arel.tools</code> root domain so the marketing site (www.) can detect login state without a full session validation.</div>
+      <div class="code-block">// Session shape — identity only, permissions resolved separately
+{
+  userId: string           // Arel DB user id
+  discordId: string        // Discord snowflake
+  activeGuildId: string    // Currently selected guild
+  guilds: [{
+    guildId: string
+    roles: string[]        // Discord role IDs — used for permission resolution
+    // arelRole NOT stored in JWT — resolved from Redis on every request
+    // Resolution order: GUILD_ADMIN seat → RAID_MANAGER seat → MEMBER (Discord roles) → no role
+    // cache:permissions:{userId}:{guildId}, TTL 5min, busted on role/seat change
+  }]
+}</div>
+      <table class="kv-table">
+        <tr><td>Guild switching</td><td>First-class UX. Users may belong to multiple guilds using Arel. Guild switcher in nav from day one.</td></tr>
+        <tr><td>Permission mapping</td><td>Three roles: MEMBER, RAID_MANAGER, GUILD_ADMIN. Content requiring no login sits outside the guild procedure chain entirely — there is no PUBLIC role, just the absence of one. Resolution order on every API request: check <code>core.guild_seats</code> for GUILD_ADMIN → check <code>core.guild_seats</code> for RAID_MANAGER → check Discord roles against <code>core.guild_role_mappings</code> for MEMBER → no role (route must be outside <code>guildProcedure</code> to be accessible). Resolved fresh from Redis cache on every request — not baked into the JWT. TTL: 5 minutes.</td></tr>
+        <tr><td>Cache invalidation</td><td>Permission cache at <code>cache:permissions:{userId}:{guildId}</code> is busted immediately on seat grant/revoke, role mapping change, or bot <code>GUILD_MEMBER_UPDATE</code> event. Cache miss triggers re-resolution from DB — permissions always fresh within 5 minutes without any user action.</td></tr>
+        <tr><td>Marketing site detection</td><td>www. (Astro) reads root domain cookie to detect login state and swap CTAs. Does not validate session — presence check only.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Admin UI — Google OAuth</div>
+      <div class="body-text">Separate NextAuth instance in apps/admin. Google OAuth provider. Access controlled by email allowlist in environment variables — migrated to DB table when roles are added.</div>
+      <div class="code-block">// apps/admin — NextAuth config
+{
+  providers: [GoogleProvider({...})],
+  callbacks: {
+    signIn: ({ profile }) =>
+      ADMIN_ALLOWED_EMAILS.includes(profile.email)
+      // or: profile.email.endsWith('@arel.tools')
+  }
+}</div>
+      <div class="body-text">Admin auth is fully independent of Discord. Team members do not need Discord accounts to access the admin UI. Access is revoked by removing the email from the allowlist — no app changes required.</div>
+    </div>
+  </section>
+
+  <!-- 08 Service Identity -->
+  <section class="section" id="s09">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">09</span>
+        <h2 class="section-title">Service Identity</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Guild roles, service roles, procedure hierarchy, and bot trigger modes.</div>
+    </div>
+    <div class="section-intro">Every request to the API answers two independent questions: who is the human (user auth), and which system is making the call (service auth). These are orthogonal checks. Service identity determines which procedures a caller is permitted to invoke at all — before any user-level permission check runs.</div>
+    <div class="sub">
+      <div class="sub-title">Guild Role System</div>
+      <div class="body-text">Three roles define what a user can do within a guild. Content that requires no login sits outside the guild procedure chain entirely — there is no PUBLIC role, just the absence of one. Routes not wrapped in <code>guildProcedure</code> are unauthenticated by definition.</div>
+      <table class="data-table">
+        <tr><th>Role</th><th>How Granted</th><th>Seat Required</th><th>Access</th></tr>
+        <tr><td><strong>MEMBER</strong></td><td>Resolved at auth time from Discord roles — no explicit grant or storage. Guild configures which Discord role IDs map to MEMBER in <code>core.guild_role_mappings</code>.</td><td>No</td><td>Member-only content and features</td></tr>
+        <tr><td><strong>RAID_MANAGER</strong></td><td>Explicit seat grant (manual or auto-grant via Discord role). <code>auto_manage</code> on the role mapping controls auto-grant behaviour — see below.</td><td>Yes — seat tracked in <code>core.guild_seats</code>. Free plan hard-capped at 2 total seats (RAID_MANAGER + GUILD_ADMIN combined). Unlimited on Supporter plan. <strong>User-facing copy uses "raid lead seats" as shorthand — this cap applies to both RAID_MANAGER and GUILD_ADMIN seats combined, not RAID_MANAGER alone.</strong></td><td>Raid management features: roster, encounter planning, raid events</td></tr>
+        <tr><td><strong>GUILD_ADMIN</strong></td><td>Explicit seat grant only. No auto-grant. First admin must be bootstrapped manually.</td><td>Yes — seat tracked in <code>core.guild_seats</code>. Counts toward Free plan seat cap. Unlimited on Supporter plan.</td><td>Billing, role mappings, seat grants, guild configuration</td></tr>
+      </table>
+      <div class="body-text">MEMBER is never stored in Arel — resolved live from Discord OAuth roles at auth time and cached in <code>cache:permissions:{userId}:{guildId}</code> with a 5-minute TTL. A user removed from their Member Discord role loses MEMBER access within 5 minutes with no Arel DB write required. RAID_MANAGER and GUILD_ADMIN are stored in <code>core.guild_seats</code> and enforced explicitly.</div>
+      <div class="body-text"><strong>First GUILD_ADMIN bootstrap:</strong> when a new guild is onboarded, there is no existing GUILD_ADMIN to grant the first seat. Engineering grants the first GUILD_ADMIN seat via the admin UI (<code>internalAdminProcedure</code>) before handing off to the guild. The presumed recipient is the Discord user who authorized the bot OAuth install — confirmed with the guild during onboarding. This action is logged to <code>internal.audit_log</code>. Once the first GUILD_ADMIN seat exists, that user can grant further seats independently. <strong>Known scaling constraint:</strong> this requires an engineer to act for every new guild signup. At low volume this is manageable; at scale it becomes a bottleneck. The planned automation path is to auto-grant the first GUILD_ADMIN seat to the Discord user who authorized the bot OAuth install at install time — eliminating manual intervention. See Deferred Decisions.</div>
+      <table class="kv-table">
+        <tr><td>Seat cap enforcement on downgrade</td><td>When <code>guild.downgrade</code> fires and the guild moves to the Free plan (2-seat cap), excess seats are revoked immediately as part of the downgrade job. Seats are revoked in reverse grant order — most recently granted first. GUILD_ADMIN seats are counted against the cap; if total seats exceed 2, RAID_MANAGER seats are revoked first. The guild admin is notified by email listing which seats were revoked and why. Auto-manage cannot re-grant a seat while the guild is at the 2-seat cap — the pending state behaviour applies as normal.</td></tr>
+        <tr><td>auto_manage — grant</td><td>When a user gains the mapped Discord role, Arel <em>attempts</em> auto-grant. If seats are available: seat granted, cache busted, guild admin notified. If no seats available: user enters pending state in permissions UI, guild admin notified with upgrade CTA.</td></tr>
+        <tr><td>auto_manage — revoke</td><td>When a user loses the mapped Discord role, their RAID_MANAGER seat is always auto-revoked — <strong>unless</strong> they also hold a GUILD_ADMIN seat in Arel, in which case the auto-revoke is blocked and the guild admin is notified to handle it manually. A GUILD_ADMIN who is also a raid manager should not lose access silently due to a Discord role change.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">core.guild_role_mappings</div>
+      <div class="code-block">-- core.guild_role_mappings
+guild_id        text
+discord_role_id text
+arel_role       text          -- 'MEMBER', 'RAID_MANAGER'
+                              -- GUILD_ADMIN has no mapping row — explicit seat grant only,
+                              -- never driven by Discord role changes
+auto_manage     boolean       -- RAID_MANAGER only. If true:
+                              --   GAIN role → attempt auto-grant (pending if no seats)
+                              --   LOSE role → auto-revoke RAID_MANAGER seat, UNLESS the user
+                              --               also holds a GUILD_ADMIN seat in guild_seats
+                              --               (checked via DB, not via a mapping row)
+                              --               If blocked: notify guild admin to handle manually
+                              -- always false for MEMBER (resolved at auth, never stored)
+PRIMARY KEY (guild_id, discord_role_id)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Service Roles</div>
+      <table class="data-table">
+        <tr><th>Role</th><th>Caller</th><th>Allowed Scope</th><th>Denied Scope</th></tr>
+        <tr><td><strong>WEBHOOK</strong></td><td>Patreon, Discord, external services</td><td>webhooks.* only. Signature verified, no session.</td><td>Everything else</td></tr>
+        <tr><td><strong>WEB_CLIENT</strong></td><td>apps/app (Vercel)</td><td>All user-facing procedures, filtered further by user permissions</td><td>bot.*, admin.*, workers.*, billing.modify</td></tr>
+        <tr><td><strong>BOT</strong></td><td>apps/bot (Northflank)</td><td>members.*, guilds.config.*, announcements.*, ingested.*</td><td>billing.*, subscriptions.*, admin.*, auth.*</td></tr>
+        <tr><td><strong>WORKER</strong></td><td>Inngest jobs (Northflank)</td><td>sync.*, ingested.*, usage.reset, notifications.send, analytics.*</td><td>billing.*, admin.*, auth.*</td></tr>
+        <tr><td><strong>INTERNAL_ADMIN</strong></td><td>apps/admin</td><td>Full access — <code>internalAdminProcedure</code>. Named to distinguish from guild-level <code>guildAdminProcedure</code>.</td><td>None — all actions audit logged without exception</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Bot Trigger Modes</div>
+      <div class="body-text">The bot operates in two modes with different context requirements. The distinction is enforced at the procedure level — not assumed.</div>
+      <table class="kv-table">
+        <tr><td>BOT_AUTONOMOUS</td><td>Bot acting on its own schedule or in reaction to a system event. Guild context required. No user context. Examples: processing a scheduled announcement, auto-syncing roster on role change, sending raid reminders.</td></tr>
+        <tr><td>BOT_USER_INITIATED</td><td>User ran a slash command, clicked a button component, or submitted a modal in Discord. Guild context required. <strong>User context required.</strong> Permission checks run against the triggering user, not the bot. Audit log records the human as accountable.</td></tr>
+      </table>
+      <div class="body-text">Discord always provides the interaction user on slash commands, button clicks, select menus, and modal submissions. The bot is responsible for passing <code>triggerUserId</code> in the request. The API trusts this value because the bot is a trusted internal service — not a public client.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Bot Procedure Hierarchy — User-Initiated Commands</div>
+      <div class="body-text">Once <code>triggerUserId</code> is present, the same four-role permission model applies as on the web. The API resolves the user's Arel role from <code>cache:permissions:{userId}:{guildId}</code> — same Redis cache, same 5-minute TTL, same invalidation rules. The bot does not implement its own permission logic.</div>
+      <div class="code-block">botProcedure                       // BOT service role, guild context, no user
+  └── botUserProcedure             // BOT service role, guild context, triggerUserId present
+        └── botMemberProcedure     // triggerUser has MEMBER role or above
+              └── botRaidManagerProcedure   // triggerUser has RAID_MANAGER seat
+                    └── botGuildAdminProcedure  // triggerUser has GUILD_ADMIN seat
+
+// Example — RAID_MANAGER required to create a raid via bot command
+export const createRaidCommand = botRaidManagerProcedure
+  .use(requireFeature('raid_management'))
+  .use(requireLimit('RAID_EVENTS_PER_MONTH'))
+  .mutation(async ({ ctx, input }) => { ... })</div>
+      <div class="body-text">A MEMBER attempting a RAID_MANAGER command receives a Discord ephemeral error response — visible only to them. Discord-level visibility (below) reduces how often this happens in practice, but the API check is always the authoritative gate.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Discord Command Visibility</div>
+      <div class="body-text">Discord supports per-command role-based visibility at the guild level — users who don't have the required role simply don't see the command in Discord's UI. Arel drives this automatically from <code>core.guild_role_mappings</code>, which already holds the Discord role IDs for each Arel role level.</div>
+      <table class="kv-table">
+        <tr><td>How it works</td><td>When a guild configures or updates their role mappings in Arel, the bot calls Discord's command permissions API to update visibility for each command — setting the allowed Discord role IDs based on the minimum Arel role required for that command.</td></tr>
+        <tr><td>Source of truth</td><td><code>core.guild_role_mappings</code> — the same config that drives API permission resolution. One config, two surfaces: API enforcement and Discord UI visibility.</td></tr>
+        <tr><td>Sync trigger</td><td>Bot receives a role mapping change event and calls Discord's API to update command permissions for the affected guild. No manual step required from the guild admin after initial setup.</td></tr>
+        <tr><td>Unmapped guilds</td><td>A guild that hasn't configured role mappings yet gets Discord's default command visibility — all commands visible to all members. Commands remain fully API-enforced regardless. Once mappings are configured, the bot syncs Discord visibility automatically.</td></tr>
+        <tr><td>Discord limit</td><td>Discord allows up to 100 permission overwrites per command per guild. Sufficient for all expected use cases — worth monitoring if very large multi-role guilds become common.</td></tr>
+      </table>
+      <div class="body-text"><strong>Visibility vs enforcement:</strong> Discord command visibility is a UX layer — it reduces noise and confusion for members who can't use a command. It is not a security layer. The API-level procedure check is always the authoritative gate, regardless of what Discord shows or doesn't show.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Service Tokens — Platform Level</div>
+      <div class="body-text"><strong>Phase 1 note:</strong> inter-service token verification can be skipped while api, bot, and worker run in the same process — there is no HTTP boundary to authenticate across. Wire in token verification when splitting to Phase 2. <code>config.service_tokens</code> covers <strong>platform-level internal service identity only.</strong> These identify which internal system is making an API call — not which guild is involved. There is one token per service role, shared across all guilds.</div>
+      <table class="kv-table">
+        <tr><td>Scope</td><td>Platform-wide. One token per service role: one for the bot service, one for Inngest workers, one for the admin UI.</td></tr>
+        <tr><td>Format</td><td><code>svc_[random]</code> — prefix identifies as a platform service token</td></tr>
+        <tr><td>Storage</td><td>Hashed in DB. Raw value only shown once at creation.</td></tr>
+        <tr><td>Rotation</td><td>Issue new token → update service env var → revoke old token. Zero downtime.</td></tr>
+        <tr><td>Audit</td><td>Every service token usage logged with timestamp and procedure called.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Guild Integration Credentials — Per Guild</div>
+      <div class="body-text"><code>core.guild_integrations</code> stores per-guild third-party credentials. These are entirely separate from platform service tokens — they represent a specific guild's authorization to access an external service on their behalf. All tokens are encrypted at the application layer before being written to the DB — a compromised DB connection or credential dump reveals only ciphertext. The API service holds the encryption key (environment variable on Northflank to start, migratable to a KMS without changing the app interface) and decrypts at runtime when making calls on the guild's behalf.</div>
+      <table class="kv-table">
+        <tr><td>Discord OAuth token</td><td>Issued when a guild admin installs the bot via Discord's OAuth2 flow. Scoped to that guild — allows Arel to make REST API calls to Discord on their behalf (manage roles, read members, post to channels). Distinct from the platform bot token, which is used only for the persistent WebSocket gateway connection.</td></tr>
+        <tr><td>WCL credentials</td><td>Deferred — whether WCL requires per-guild credentials depends on report visibility (public vs private). May be replaced by a platform-level WCL API key with no per-guild setup required. See Deferred Decisions.</td></tr>
+        <tr><td>Future integrations</td><td>Any additional integration a guild connects follows the same pattern — one row in <code>core.guild_integrations</code> per guild per integration type.</td></tr>
+      </table>
+      <div class="code-block">-- core.guild_integrations
+id               uuid
+guild_id         text
+integration_type text          -- 'DISCORD_BOT', 'WCL', etc.
+access_token     text          -- encrypted at rest
+refresh_token    text          -- encrypted at rest, nullable
+token_expires_at timestamptz   -- nullable if non-expiring
+scopes           text[]        -- permissions granted
+status           text          -- 'ACTIVE', 'EXPIRED', 'REVOKED', 'ERROR'
+connected_at     timestamptz
+connected_by     text          -- userId who authorized the connection
+last_used_at     timestamptz
+key_version      int           -- identifies which encryption key version was used
+                               -- required for key rotation: new version written alongside old,
+                               -- background job re-encrypts rows in batches, old version retired
+                               -- once all rows are migrated. Decryption is strict by version —
+                               -- the API loads the key matching key_version and decrypts with that
+                               -- key only. No try-all-versions fallback. The old key version must
+                               -- remain loaded until every row has been migrated to the new version.
+metadata         jsonb         -- integration-specific extras (WCL org id, etc.)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Seat Grants — core.guild_seats</div>
+      <div class="body-text">Tracks which users have been granted a RAID_MANAGER or GUILD_ADMIN seat within Arel. Seats are explicit — MEMBER is never stored here. GUILD_ADMIN seats are explicit-only (no auto-grant). RAID_MANAGER seats support optional auto-grant via Discord role, controlled by the <code>auto_manage</code> flag on <code>core.guild_role_mappings</code>.</div>
+      <div class="code-block">-- core.guild_seats
+guild_id        text
+user_id         text
+role            text          -- 'RAID_MANAGER', 'GUILD_ADMIN'
+granted_at      timestamptz
+granted_by      text          -- userId who granted the seat (nullable if auto-granted)
+grant_type      text          -- 'MANUAL', 'AUTO' (AUTO only valid for RAID_MANAGER)
+PRIMARY KEY (guild_id, user_id, role)</div>
+      <table class="kv-table">
+        <tr><td>Auto-grant</td><td>Bot detects <code>GUILD_MEMBER_UPDATE</code> — user gained a management-mapped Discord role. If seats available: insert row, bust permission cache. If no seats: add to pending state, notify guild owner.</td></tr>
+        <tr><td>Manual grant</td><td>Guild owner or manager explicitly grants a seat in the permissions UI. On Free plan, seat count is checked at grant time — hard cap of 2. On Supporter plan, no cap.</td></tr>
+        <tr><td>Revocation</td><td>Immediate — row deleted, permission cache busted. Frees the seat for the next pending user or manual grant.</td></tr>
+        <tr><td>Pending state</td><td>Users with the management Discord role but no granted seat. On Free plan: shown in permissions UI as "waiting for a seat" with per-user grant buttons and an upgrade CTA when at the 2-seat cap. On Supporter plan: no cap — auto-grant proceeds immediately if seats are available.</td></tr>
+        <tr><td>Seat count</td><td>On Free plan: checked at grant time via <code>SELECT COUNT(*) FROM guild_seats WHERE guild_id = ?</code>. Count check and insert wrapped in a transaction with <code>SELECT ... FOR UPDATE</code> on the guild row — serializes concurrent grant attempts. On Supporter plan: no count check required — grant proceeds unconditionally.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Subscriptions — core.subscriptions</div>
+      <div class="body-text">One row per guild. The local source of truth for plan state. Never written to directly by the web app or bot — only by the API service during onboarding or when supporter link changes trigger a plan change. <strong>Every guild has a row here from the moment of onboarding</strong> — written during bot install or first web login, whichever comes first. Free guilds get <code>plan_id: 'free'</code>. The enforcement middleware depends on this row existing before any quota check runs.</div>
+      <div class="code-block">-- core.subscriptions
+guild_id                text PRIMARY KEY
+plan_id                 text           -- 'free' | 'supporter'. FK to config.subscription_plans.
+                                       -- Updated by API service when supporter_links change.
+                                       -- Enforcement middleware reads this field directly.
+status                  text           -- 'ACTIVE' (only valid state — no billing states)
+created_at              timestamptz
+updated_at              timestamptz    -- set on every plan change</div>
+      <div class="body-text">Plan transitions are driven by <code>core.supporter_links</code> — when the first active link is created for a guild, <code>plan_id</code> flips to <code>'supporter'</code>. When the last active link is revoked, <code>guild.downgrade</code> sets it back to <code>'free'</code>. Calendar month window tracking lives in <code>usage.usage_history</code>, not here — no redundant fields on this table.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Guild Audit Log — core.guild_audit_log</div>
+      <div class="body-text">Guild-facing configuration history. Readable by guild managers in the web app — scoped to their own guild. Distinct from <code>internal.audit_log</code> which is your team's tool. Covers permission changes, integration events, and plan changes. Append-only, never updated or deleted.</div>
+      <div class="code-block">-- core.guild_audit_log
+id           uuid
+guild_id     text
+actor_id     text          -- userId who performed the action (nullable for SYSTEM actors)
+actor_type   text          -- 'USER'           — guild user acting via web app or bot
+                           -- 'SYSTEM'         — automated action (Patreon webhook, background job, Inngest)
+                           -- 'INTERNAL_ADMIN' — team member acting via apps/admin
+actor_role   text          -- Arel role the actor held at time of action (immutable, captured at write time)
+                           -- 'RAID_MANAGER' | 'GUILD_ADMIN' for USER actors
+                           -- null for SYSTEM actors (no role concept applies)
+                           -- null for INTERNAL_ADMIN actors (always full access — role captured in actor_type, not here)
+action       text          -- 'SEAT_GRANTED', 'SEAT_REVOKED', 'ROLE_MAPPING_CHANGED',
+                           --  'INTEGRATION_CONNECTED', 'INTEGRATION_DISCONNECTED',
+                           --  'PLAN_CHANGED', 'BOT_CONNECTED', 'BOT_DISCONNECTED'
+target_id    text          -- userId, integrationId, etc.
+target_type  text          -- 'USER', 'INTEGRATION', 'BOT', 'SUBSCRIPTION'
+before       jsonb         -- state before the change
+after        jsonb         -- state after the change
+occurred_at  timestamptz</div>
+      <div class="body-text">The <code>before</code>/<code>after</code> jsonb columns provide a flexible diff without action-specific tables. Example: a seat grant has <code>before: null, after: { userId, permissionSet, grantType }</code>. A role mapping change has <code>before: { discordRoleId, permissions[] }, after: { discordRoleId, permissions[] }</code>. A plan change has <code>before: { plan_id: 'supporter' }, after: { plan_id: 'free', reason: 'SUPPORTER_LINK_REVOKED' }</code>.</div>
+    </div>
+  </section>
+
+  <!-- 09 Feature & Plan Gates -->
+  <section class="section" id="s10">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">10</span>
+        <h2 class="section-title">Feature & Plan Gates</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Three-axis access control — plan eligibility, feature flags, and usage limits — plus numeric plan benefits, all composed in packages/config.</div>
+    </div>
+    <div class="section-intro">Three independent axes control access to any given capability. They are composed together in <code>packages/config</code> and enforced via tRPC middleware — never checked inline in route handlers or business logic.</div>
+    <div class="sub">
+      <div class="sub-title">The Three Axes</div>
+      <table class="kv-table">
+        <tr><td>Plan eligibility</td><td><strong>Who:</strong> Does this guild's plan include this feature? Resolved from the DB feature group hierarchy. Free features available to all guilds. Supporter features require Supporter plan (<code>plan_id = 'supporter'</code>).</td></tr>
+        <tr><td>Feature flag</td><td><strong>What:</strong> Is this feature currently active for this guild? Controlled by Flagsmith — rollout %, kill-switch, scheduled changes, explicit guild overrides. Flagsmith never knows about plans.</td></tr>
+        <tr><td>Usage limit</td><td><strong>How much:</strong> Has this guild consumed their quota for this action? DB transaction check — <code>SELECT ... FOR UPDATE</code>, no Redis counters. See Section 10.</td></tr>
+      </table>
+      <div class="code-block">// All three must pass. Order matters — cheapest checks first.
+canAccess = isPlanEligible(guild, featureId)   // DB group walk (Redis cached)
+        AND isFlagEnabled(guild, featureId)     // Flagsmith (Redis cached)
+        AND isUnderLimit(guild, limitType)      // DB transaction — SELECT ... FOR UPDATE. See Section 10.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Feature Groups — Plan Catalogue</div>
+      <div class="body-text">Features are organised into groups that define plan inheritance. A guild on a given plan gets all features in that plan's group and all ancestor groups. The group tree is the source of truth for what each plan includes — expressed in seed data, not code.</div>
+      <div class="code-block">-- config.feature_groups
+id           text PRIMARY KEY   -- 'platform_features', 'free_base', 'supporter_features'
+label        text               -- display name in admin UI
+plan_id      text               -- nullable: null = always-on regardless of plan
+parent_id    text               -- nullable FK to self (plan inheritance)
+description  text
+
+-- Hierarchy:
+-- platform_features   plan_id: null,        parent: null       ← always included, all guilds
+-- free_base           plan_id: 'free',      parent: null       ← Free and above
+--   supporter_features  plan_id: 'supporter', parent: 'free_base' ← Supporter only</div>
+      <div class="code-block">-- config.features
+id           text PRIMARY KEY   -- matches Flagsmith flag name exactly (unprefixed, GA only)
+group_id     text               -- FK to feature_groups
+label        text               -- display name
+description  text
+default_on   boolean            -- default Flagsmith state when created</div>
+      <div class="body-text">Only GA features have a row in <code>config.features</code>. Dev and beta flags exist in Flagsmith only — they are not in the plan catalogue until promoted. Sub-groups within a plan are supported for admin UI organisation (e.g. <code>supporter.scheduling</code>, <code>supporter.integrations</code> as children of <code>supporter_features</code>) and potential future add-on packaging.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Flagsmith — Rollout & Kill-Switch</div>
+      <div class="body-text">Self-hosted Flagsmith on Northflank. Flagsmith owns operational flag state — it does not know about plans, groups, or the DB catalogue. The app never imports the Flagsmith SDK directly — all resolution goes through <code>packages/config</code>.</div>
+      <table class="kv-table">
+        <tr><td>Scope</td><td>Rollout percentage, kill-switches, scheduled flag changes, guild-level overrides (beta access, sales exceptions, trials). Flagsmith's full feature set is available — segments, remote config values, audit history — without rebuilding any of it.</td></tr>
+        <tr><td>Rollout</td><td>Deterministic hash of <code>guildId + featureId</code>. Same guild always gets the same result for the same rollout %. Increment from 0 → 10 → 50 → 100 over time.</td></tr>
+        <tr><td>Guild overrides</td><td>Explicit per-guild enable/disable with optional expiry. Used for beta invitations and sales exceptions. Override beats rollout % — an explicitly enabled guild is always on regardless of rollout state.</td></tr>
+        <tr><td>Resolution cache</td><td>Resolved Flagsmith state cached in Redis at <code>cache:features:{guildId}</code> with 60s TTL. Busted on flag change, guild override change, or subscription change.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Flag Naming Convention & Lifecycle</div>
+      <div class="body-text">Flag prefix signals resolution mode in <code>packages/config</code>. This eliminates the conflict between plan-based access and rollout — pre-GA flags are entirely outside the plan system until explicitly promoted.</div>
+      <table class="data-table">
+        <tr><th>Prefix</th><th>Example</th><th>Resolution</th><th>DB row?</th></tr>
+        <tr><td><code>dev.*</code></td><td><code>dev.encounter_planner</code></td><td>Hardcoded off for all guilds except internal test guild allowlist. Never shown in any UI.</td><td>No</td></tr>
+        <tr><td><code>beta.*</code></td><td><code>beta.encounter_planner</code></td><td>Flagsmith guild overrides only — no plan check. Explicitly enabled guilds only. Used for design partners, early access, dogfooding.</td><td>No</td></tr>
+        <tr><td>(none, plan-gated)</td><td><code>encounter_planner</code></td><td>Full resolution: plan eligibility (DB group walk) AND Flagsmith rollout state. Both must pass.</td><td>Yes — assigned to a plan feature group</td></tr>
+        <tr><td>(none, platform)</td><td><code>core_scheduling</code></td><td>Short-circuits immediately — <code>platform_features</code> group returns true without calling Flagsmith. Flagsmith flag can be safely deleted once moved here.</td><td>Yes — assigned to <code>platform_features</code></td></tr>
+      </table>
+      <div class="body-text"><strong>Promotion flow:</strong> rename <code>beta.encounter_planner</code> → <code>encounter_planner</code> in Flagsmith, add row to <code>config.features</code> with correct <code>group_id</code>, set Flagsmith rollout to desired %. Beta guilds with explicit overrides retain them.</div>
+      <div class="body-text"><strong>Retirement flow (GA to all plans):</strong> move the feature's <code>group_id</code> to <code>platform_features</code> in DB, then delete the Flagsmith flag. <code>packages/config</code> short-circuits on <code>platform_features</code> and never calls Flagsmith — safe to delete the flag without any application code change. Keeps Flagsmith tidy as the codebase grows.</div>
+      <div class="body-text"><strong>Full feature lifecycle:</strong></div>
+      <div class="code-block">dev.x          → internal test guilds only. No DB row. No Flagsmith rollout.
+beta.x         → Flagsmith overrides only. No DB row. No plan check.
+x              → Add DB row (e.g. group_id: 'supporter_features'). Flagsmith rollout 10% → 100%.
+x              → Move DB row to free_base. Flagsmith still at 100%.
+x              → Move DB row to platform_features. Delete Flagsmith flag.
+               → packages/config short-circuits. Zero Flagsmith calls. Flag cleaned up.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">packages/config — Resolution Logic</div>
+      <div class="code-block">// Single entry point — application code never calls Flagsmith or queries features directly
+function canAccessFeature(guild, featureId): boolean {
+
+  // dev.* — internal only, no plan or flag resolution
+  if (featureId.startsWith('dev.')) {
+    return isInternalTestGuild(guild.id)
+  }
+
+  // beta.* — Flagsmith overrides only, no plan check
+  if (featureId.startsWith('beta.')) {
+    return flagsmith.isEnabled(featureId, guild.id)
+  }
+
+  const feature = db.features.find(featureId)   // null if not yet in catalogue
+  if (!feature) return false
+
+  // platform_features — always on for all guilds, no Flagsmith call needed
+  // Safe to delete the Flagsmith flag once a feature is moved here
+  if (feature.group_id === 'platform_features') return true
+
+  // Plan-gated GA feature — both axes must pass
+  const planEligible = isPlanEligible(guild, featureId)  // DB group walk, Redis cached
+  const flagEnabled  = flagsmith.isEnabled(featureId, guild.id)  // Flagsmith, Redis cached
+  return planEligible && flagEnabled
+}
+
+// Plan eligibility — walk group tree upward from guild's plan group
+function isPlanEligible(guild, featureId): boolean {
+  const feature = db.features.find(featureId)
+  if (!feature) return false
+  const eligibleGroups = getGroupAndAncestors(planGroup(guild.plan_id))
+  // platform_features handled above — not included in plan walk
+  return eligibleGroups.includes(feature.group_id)
+}</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Plans</div>
+      <table class="data-table">
+        <tr><th>Plan</th><th>How Granted</th><th>Feature Groups Included</th></tr>
+        <tr><td><strong>Free</strong></td><td>Default — all guilds start here</td><td>platform_features + free_base. 30-day ingested data window. Up to 8 raids per calendar month.</td></tr>
+        <tr><td><strong>Supporter</strong></td><td>At least one active Patreon supporter has linked this guild</td><td>platform_features + free_base + supporter_features. Full history. Unlimited raids. Automation &amp; scheduling features. Early access.</td></tr>
+      </table>
+      <div class="body-text">Plan definitions and feature group assignments are DB seed data. Changing what a plan includes never requires a code deploy.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Supporter Status Resolution</div>
+      <div class="body-text">A guild's plan is stored in <code>core.subscriptions.plan_id</code> (<code>'free'</code> | <code>'supporter'</code>) and kept in sync by the API service. When the first active supporter link is created for a guild, <code>plan_id</code> is set to <code>'supporter'</code>. When the last active link is revoked, <code>guild.downgrade</code> sets it back to <code>'free'</code>. The <code>plan_id</code> field is the value the enforcement middleware reads — it is the authoritative cached plan state. The live source of truth for <em>why</em> a guild holds a given plan is always <code>core.supporter_links</code>. Guild config cached in Redis at <code>cache:guild:{guildId}</code> (TTL 5 min), busted immediately on any plan change.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Procedure Hierarchy</div>
+      <div class="code-block">// Expresses WHO can call this. Plan + feature + limit enforcement via middleware only.
+baseProcedure                         // service role check
+  └── guildProcedure                  // guild context + active subscription
+        └── memberProcedure           // MEMBER role or above (resolved from Discord roles at auth)
+              └── raidManagerProcedure  // RAID_MANAGER seat required
+                    └── guildAdminProcedure  // GUILD_ADMIN seat required (seats, config, role mappings)
+        └── botProcedure              // BOT service role + guild context, no user required
+              └── botUserProcedure    // BOT service role + guild context + triggerUserId present
+                    └── botMemberProcedure      // triggerUser has MEMBER role or above
+                          └── botRaidManagerProcedure   // triggerUser has RAID_MANAGER seat
+                                └── botGuildAdminProcedure  // triggerUser has GUILD_ADMIN seat
+  └── workerProcedure                 // WORKER service role (Inngest), cross-guild capable
+  └── internalAdminProcedure          // INTERNAL_ADMIN service role (apps/admin), all calls audit logged
+
+// Full example — role + feature + limit all composed
+export const createRaidEvent = raidManagerProcedure
+  .use(requireFeature('raid_management'))     // plan eligibility + Flagsmith, composed in packages/config
+  .use(requireLimit('RAID_EVENTS_PER_MONTH')) // DB transaction check
+  .mutation(async ({ ctx, input }) => { ... })
+
+// requirePlan() available as explicit escape hatch for routes with no feature flag equivalent
+// Use sparingly — prefer requireFeature() for all standard gating</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Numeric Plan Benefits</div>
+      <div class="body-text">Some plan differences are expressed as numeric values rather than feature flags or consumable limits — a number that caps or filters guild behavior based on their plan. These are <strong>plan benefits</strong>: not counters, not enforced via transactions. The value is defined per plan in <code>config.plan_benefits</code> seed data and overridable per-guild by internal admins via <code>config.guild_config_overrides</code>.</div>
+      <table class="kv-table">
+        <tr><td>When to use</td><td>A numeric plan benefit is the right pattern when: the value is a cap or filter applied at read/query time rather than a write-time transaction; there is no natural "one unit consumed" moment. If a value has a consumable counter, use a limit. If it is boolean (on/off), use a feature flag.</td></tr>
+        <tr><td>config.plan_benefits</td><td>Seed data table — one row per <code>benefit_key</code> per plan. <code>benefit_key</code> identifies the benefit (e.g. <code>DATA_VISIBILITY_DAYS</code>). Value is a nullable integer — <code>NULL</code> means unlimited. Changing values per plan requires only a seed data update, no deploy.</td></tr>
+        <tr><td>Storage strategy</td><td>Two approaches depending on access pattern. <strong>Static column on core.guilds</strong> — value computed at plan-change time and stored directly (e.g. <code>data_visible_from timestamptz</code>). Best for values used as hot-path query filters where a join would be costly. <strong>Dynamic resolution</strong> — resolved at read time by checking <code>guild_config_overrides</code> then <code>plan_benefits</code>. Best for values checked occasionally (e.g. a max integrations cap checked at connection time). Chosen per benefit, not as a blanket rule.</td></tr>
+        <tr><td>Per-guild override</td><td>Internal admins set overrides in <code>config.guild_config_overrides</code> using the same <code>config_key</code> as the benefit key. Override persists across plan changes — never auto-recalculated. Resolution: <code>COALESCE(override.value, plan_default)</code>. The admin UI shows both values side by side and flags when the override is below the guild's current plan default — divergence is visible and intentional, never silent.</td></tr>
+        <tr><td>On plan upgrade</td><td>Static values are recomputed and written immediately — same step as feature cache bust and limit update. Dynamically resolved values reflect the new plan at next read automatically.</td></tr>
+        <tr><td>Drift prevention</td><td><strong>Static timestamps must be recalculated periodically to prevent window drift.</strong> A timestamp set once at plan-change time grows stale — a Free guild that hasn't changed plans in 6 months would have a <code>data_visible_from</code> 6 months ago, not 30 days ago. The <code>data_visible_from.recalculate</code> daily cron recalculates and writes the value for all Free-plan guilds using <code>NOW() - INTERVAL '30 days'</code>. Supporter guilds are excluded — their <code>data_visible_from</code> is always <code>NULL</code>.</td></tr>
+        <tr><td>On plan downgrade</td><td>Static values are recomputed immediately when <code>guild.downgrade</code> fires. Dynamic values reflect the lower plan at next read after the downgrade job completes.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">DATA_VISIBILITY_DAYS</div>
+      <div class="body-text">The current numeric plan benefit. Controls how far back a guild can query their own history — raid events, attendance, logs, roster changes. Uses the <strong>static column</strong> storage strategy because it is applied as an indexed filter on every ingested data query. Retention and visibility are distinct — data beyond the visibility window is retained in Postgres until archival, never deleted on downgrade.</div>
+      <table class="kv-table">
+        <tr><td>Storage</td><td><code>data_visible_from timestamptz</code> on <code>core.guilds</code>. Set at plan-change time and recalculated daily by <code>data_visible_from.recalculate</code> to prevent window drift — see Section 13. All ingested data queries append <code>AND occurred_at &gt;= data_visible_from</code>. <code>NULL</code> = no cutoff (Supporter plan).</td></tr>
+        <tr><td>Plan defaults</td><td>Free: 30 days. Supporter: unlimited (null).</td></tr>
+        <tr><td>has_older_data</td><td>Boolean on <code>core.guilds</code>. Recalculated synchronously when <code>data_visible_from</code> is written, and again after each <code>sync.wcl</code> completes — via <code>SELECT EXISTS</code> across <code>ingested.wcl_reports</code>, <code>wcl_attendance</code>, and <code>wcl_kills</code> (and any future ingested tables). When <code>true</code>, the UI shows an upgrade CTA — "You have raid history beyond your current window" — rather than an empty state. See Section 17 for the full recalculation spec.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10 Usage Limits -->
+  <section class="section" id="s10">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">11</span>
+        <h2 class="section-title">Usage Limits</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Limit Types</div>
+      <table class="data-table">
+        <tr><th>Limit</th><th>Notes</th></tr>
+        <tr>
+          <td><strong>RAID_EVENTS_PER_MONTH</strong><div class="limit-meta"><div class="limit-meta-row"><span class="limit-meta-label">Window</span><span class="limit-meta-value">Calendar month — resets on the 1st</span></div><div class="limit-meta-row"><span class="limit-meta-label">Free</span><span class="limit-meta-value">8 raids/month</span></div><div class="limit-meta-row"><span class="limit-meta-label">Supporter</span><span class="limit-meta-value">Unlimited</span></div></div></td>
+          <td>Raid events created per calendar month. Supporter guilds have no limit — quota check skipped, row written with <code>outcome = 'CONSUMED'</code> like any other creation. Free guilds are warned at 6 and hard-blocked at 8, both written to <code>usage_events</code>.<br><br><strong>Delete rule:</strong> Raid events are soft-deleted (<code>deleted_at timestamptz</code>). On soft delete, a <code>usage_events</code> row is written with <code>outcome = 'RETURNED'</code> and <code>delta = -1</code> only if <code>event_date::date &gt;= CURRENT_DATE</code> (UTC) — future events return their slot, past and same-day events do not. Applies to all plans for consistent auditability.</td>
+        </tr>
+      </table>
+      <div class="body-text">Raid lead seats are <strong>unlimited on Supporter</strong> and capped at 2 on Free. Enforced at grant time via <code>SELECT COUNT(*)</code> inside a DB transaction — not tracked in <code>usage_events</code>.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Enforcement Model</div>
+      <table class="kv-table">
+        <tr><td>Supporter guilds</td><td>Limit middleware skips the quota check. A <code>usage_events</code> row is written with <code>outcome = 'CONSUMED'</code> and <code>delta = +1</code> — identical to a Free guild creation. Whether a limit was in play is recoverable from <code>context.planId</code>.</td></tr>
+        <tr><td>Free guilds — warn</td><td>At 6 raids in the current calendar month, enforcement middleware emits a <code>usage.threshold_reached</code> Inngest event keyed on <code>{guildId}:RAID_EVENTS_PER_MONTH:{monthStart}</code>. Inngest deduplicates — warning fires exactly once per guild per month. Usage meter shown in guild settings and inline near the create raid action.</td></tr>
+        <tr><td>Free guilds — block</td><td>At 8 raids, hard block. A <code>usage_events</code> row is written with <code>outcome = 'BLOCKED'</code>, <code>delta = 0</code>, and <code>outcome_detail = { limit: 8, current: 8 }</code> — nothing was created. Block message shows current count, monthly limit, reset date (1st of next month), and Patreon supporter CTA.</td></tr>
+        <tr><td>Serialization</td><td>Enforcement uses DB transactions with <code>SELECT ... FOR UPDATE</code>. Check and write are atomic — no race conditions.</td></tr>
+        <tr><td>Durable record</td><td>Every attempt writes an immutable row to <code>usage.usage_events</code>. <code>delta = +1</code> on creation (CONSUMED). <code>delta = -1</code> on slot return (RETURNED). <code>delta = 0</code> when nothing was created (BLOCKED). <code>outcome</code> always carries the full result.</td></tr>
+        <tr><td>Reset</td><td>Calendar month — the <code>usage.reset</code> cron fires at 0:05 UTC on the 1st of each month for all guilds. Simple and predictable — no per-guild scheduling.</td></tr>
+        <tr><td>Plan definitions</td><td>Base allocations stored in <code>config.plan_limits</code> as seed data. No deploy needed to change quotas.</td></tr>
+        <tr><td>Guild overrides</td><td><code>config.guild_config_overrides</code> — per-guild admin overrides with optional expiry. Sales and support lever.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Auditability</div>
+      <div class="body-text">Every limit interaction — consume, block, or return — is recorded in <code>usage.usage_events</code> (immutable, append-only). <code>delta = +1</code> on creation (CONSUMED, all plans); <code>delta = -1</code> on slot return (RETURNED); <code>delta = 0</code> when nothing was created (BLOCKED). <code>outcome</code> identifies the result; <code>outcome_detail</code> carries structured context for BLOCKED rows. At each month close, <code>usage.reset</code> writes a summary row to <code>usage.usage_history</code> — aggregating net <code>delta</code> per guild per month.</div>
+      <div class="code-block">-- usage.usage_events  (append-only — TimescaleDB hypertable, partitioned by occurred_at)
+id                uuid
+guild_id          text
+limit_type        LimitType       -- 'RAID_EVENTS_PER_MONTH'
+delta             int             -- +1 on successful creation (quota checked or not)
+                                  -- -1 on future-event soft delete return
+                                  --  0 on blocked attempt (quota exhausted, nothing created)
+outcome           text            -- 'CONSUMED' | 'RETURNED' | 'BLOCKED'
+                                  --   CONSUMED  — something was created. Applies to all plans.
+                                  --               whether a limit was in play is recoverable
+                                  --               from context.planId — no separate outcome needed.
+                                  --   RETURNED  — future event soft-deleted, slot returned
+                                  --   BLOCKED   — hard limit reached, request rejected, nothing created
+outcome_detail    jsonb           -- flexible: reason for BLOCKED (e.g. { limit: 8, current: 8 }),
+                                  --           null for CONSUMED and RETURNED
+context           jsonb           -- { procedure, userId, serviceRole, triggerType, planId }
+                                  -- planId included so plan context is self-contained in the row —
+                                  -- no join to core.subscriptions needed to interpret the record
+occurred_at       timestamptz
+
+-- usage.usage_history  (one row per guild per calendar month)
+id                  uuid
+guild_id            text
+limit_type          LimitType
+month_start         timestamptz   -- 1st of the month, 0:00 UTC
+month_end           timestamptz   -- 1st of next month, 0:00 UTC
+base_used           int           -- net events in this period (sum of delta: CONSUMED minus RETURNED)
+base_allowed        int           -- limit in effect at period close (null = unlimited)
+plan_id             text          -- plan in effect at period close
+created_at          timestamptz</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Warning & Upgrade Flow</div>
+      <div class="rules-list">
+        <div class="rule-item"><span class="rule-num">—</span><div>At <strong>6 raids</strong> in the current calendar month, enforcement middleware emits <code>usage.threshold_reached</code>. Inngest deduplicates by event ID — fires exactly once per guild per month. The <code>usage.warn</code> job sends a notification to the guild owner with current usage, limit, reset date, and a Patreon supporter CTA.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div>At <strong>8 raids</strong>, hard block. Block message shows count, limit, reset date (1st of next month), and Patreon CTA.</div></div>
+        <div class="rule-item"><span class="rule-num">—</span><div>Usage meter shown in guild settings and inline near the create raid action.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 API Service -->
+  <section class="section" id="s11">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">12</span>
+        <h2 class="section-title">API Service</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="section-intro">The API service is the single source of all business logic and data access. It is a standalone Node.js tRPC server running as a persistent container on Northflank. apps/app and apps/bot are consumers — they call procedures, they do not own data.</div>
+    <div class="sub">
+      <div class="sub-title">Why Standalone (Not Next.js Route Handlers)</div>
+      <table class="kv-table">
+        <tr><td>Connection pooling</td><td>Persistent container maintains a stable Postgres connection pool. No serverless connection exhaustion. Vercel functions connect to the API over HTTP — they never open a DB connection.</td></tr>
+        <tr><td>Vercel cost</td><td>Vercel functions become thin — receive request, validate session, call API, return response. Minimal duration and compute billed to Vercel.</td></tr>
+        <tr><td>Shared access</td><td>Both the web app (Vercel) and bot (Northflank) call the same API with the same procedure definitions. Business logic is never duplicated.</td></tr>
+        <tr><td>No cold starts</td><td>Persistent container is always warm. No function cold start latency on DB-heavy operations.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Context Factory</div>
+      <div class="code-block">// Every request resolves caller identity and injects scoped context
+// TypeScript camelCase — DB columns use snake_case equivalents
+createContext({ req }) → {
+  serviceRole: ServiceRole
+  guildId: string | null      // from session — never from request payload
+  userId: string | null       // null for autonomous bot calls
+  discordUserId: string | null
+  triggerType: 'USER_COMMAND' | 'AUTONOMOUS' | null
+  planId: string              // resolved from core.subscriptions — 'free' | 'supporter'
+  features: Set&lt;string&gt;       // resolved and cached
+  db: PrismaClient            // RLS-scoped to guildId
+}</div>
+    </div>
+  </section>
+
+  <!-- 12 Bot -->
+  <section class="section" id="s12">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">13</span>
+        <h2 class="section-title">Discord Bot</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text">Discord.js persistent service on Northflank. The bot requires a persistent WebSocket connection to Discord's gateway — fundamentally incompatible with Vercel's serverless model. It runs as a dedicated container on Northflank alongside the API service.</div>
+    <div class="sub">
+      <div class="sub-title">Bot Responsibilities</div>
+      <table class="kv-table">
+        <tr><td>Slash commands</td><td>Raid signups, roster queries, attendance lookups, announce commands. User-initiated — passes userId through to API.</td></tr>
+        <tr><td>Event handling</td><td>Member join/leave, role changes, guild config events. Autonomous — no user context. Writes to DB via API service.</td></tr>
+        <tr><td>WCL sync trigger</td><td>Bot maintains a persistent <code>MESSAGE_CREATE</code> listener on the guild's configured WCL channel. On any message, the bot checks for a WCL report URL via regex. On match, extracts the report code and publishes an Inngest event. The <code>sync.wcl</code> worker fetches the report and writes to the ingested schema. The listener is always-on — no manual trigger required from the guild.</td></tr>
+        <tr><td>Notifications</td><td>Sends roster confirmations and attendance summaries to configured Discord channels. Scheduled raid reminders are sent by the <code>notifications.reminder</code> Inngest worker via Discord REST API — not by the bot process (see Section 13).</td></tr>
+        <tr><td>Install flow</td><td>OAuth2 guild authorization redirects back to app.arel.tools to complete setup. Bot config stored in DB. Guild admins configure bot through the web app.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Web → Bot Triggers</div>
+      <table class="kv-table">
+        <tr><td>Inngest event</td><td>Primary pattern for important async triggers (send announcement, kick off sync, update channel topic). Delivery guaranteed with retry logic. Web app publishes event; Inngest delivers to the <strong>Inngest worker container</strong> (a separate Northflank service — not the bot process). The worker executes the job and may write to DB or publish a follow-up Redis signal to the bot if a Discord action is needed.</td></tr>
+        <tr><td>Redis pub/sub</td><td>Low-stakes real-time signals where message loss is acceptable (presence update, soft notification). Bot publishes to <code>pubsub:to-web:{guildId}:*</code>; Vercel SSE route is subscribed and pushes to client. This is bot → web only — see Section 06 key namespaces.</td></tr>
+        <tr><td>Direct HTTP</td><td>Used sparingly — only for synchronous responses the user is actively waiting on. Always question whether a DB state read can replace this.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 13 Background Jobs -->
+  <section class="section" id="s13">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">14</span>
+        <h2 class="section-title">Background Jobs</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text">Inngest, running workers on Northflank. Events are published from Vercel (user-initiated async work), from the bot (Discord-triggered async work), or on a schedule (crons). All jobs have retry logic, step-level failure recovery, and full execution history in the Inngest dashboard.</div>
+    <div class="sub">
+      <div class="sub-title">Job Inventory</div>
+      <table class="data-table">
+        <tr><th>Job</th><th>Trigger</th><th>Description</th></tr>
+        <tr><td><strong>sync.wcl</strong></td><td>Bot detects WCL URL posted in guild's configured channel (<code>MESSAGE_CREATE</code>)</td><td>Fetch WCL report by code. Write to <code>ingested.wcl_reports</code>, <code>wcl_attendance</code>, <code>wcl_kills</code>. Idempotent — reimporting the same report code is a no-op. Distributed lock prevents concurrent syncs per guild. After writing, recalculates <code>has_older_data</code> on <code>core.guilds</code> for the affected guild.</td></tr>
+        <tr><td><strong>sync.integration</strong></td><td>Bot event or manual trigger</td><td>Generic sync job for additional integrations as they are added.</td></tr>
+        <tr><td><strong>usage.reset</strong></td><td>Monthly cron — 0:05 UTC on the 1st of each month. Fires for all guilds simultaneously — calendar month alignment makes per-guild scheduling unnecessary.</td><td>Writes a snapshot row to <code>usage.usage_history</code> at month close for all guilds. Captures net count (sum of <code>delta</code> where <code>outcome IN ('CONSUMED', 'RETURNED')</code> — BLOCKED rows contribute zero and are excluded) and the limit in effect (<code>null</code> for Supporter). Current-month totals are always derivable from <code>usage.usage_events</code> — the history snapshot is a convenience aggregate for reporting and auditing, not the counter itself.</td></tr>
+        <tr><td><strong>usage.warn</strong></td><td><code>usage.threshold_reached</code> Inngest event, emitted by enforcement middleware when a Free guild creates its 6th raid event in the current calendar month. Deduplicated by Inngest event ID keyed on <code>{guildId}:RAID_EVENTS_PER_MONTH:{monthStart}</code> — fires exactly once per guild per month.</td><td>Sends warning notification to guild owner with current usage (6/8), reset date (1st of next month), and Patreon supporter CTA.</td></tr>
+        <tr><td><strong>guild.downgrade</strong></td><td>Triggered immediately when a supporter link is revoked and the guild has no remaining active supporter links.</td><td>Downgrades guild to Free plan — sets <code>core.subscriptions.plan_id</code> to <code>'free'</code>. Sets <code>last_plan_change_at</code> to <code>NOW()</code> on <code>core.guilds</code> — this resets the inactivity clock so the guild has a full 90 days from downgrade before archival risk. Idempotent — safe to run twice. Enforces the 2-seat cap: excess seats revoked in reverse grant order (most recently granted first), RAID_MANAGER seats before GUILD_ADMIN. Guild admin notified by email listing revoked seats and free plan limits. Feature cache busted. <code>data_visible_from</code> set to <code>NOW() - 30 days</code>. Written to <code>internal.audit_log</code>.</td></tr>
+        <tr><td><strong>guild.inactivity-warn</strong></td><td>Daily cron — 1:30 UTC. Checks all Free-plan guilds against <code>core.guilds.last_activity_at</code>.</td><td>Three escalating warning emails at 60, 75, and 87 days of inactivity (30, 15, and 3 days before archival). The job runs three passes per execution — one per threshold value (60, 75, 87) — each pass querying for guilds that have crossed that threshold and not yet received that warning in the current inactivity cycle. Daily cron approach — no per-guild scheduling or event cancellation required. Up to 24 hours of imprecision at these timescales is invisible to users. Dedup via <code>core.guild_inactivity_warnings</code> log table — one row per guild per threshold per cycle. Cron query: <code>LEFT JOIN guild_inactivity_warnings w ON w.guild_id = g.guild_id AND w.threshold_days = ? AND w.sent_at &gt; g.last_activity_at</code>. A warning sent before the guild's last activity is automatically excluded — no explicit reset required on activity. Schema: <code>guild_id, threshold_days int, sent_at timestamptz</code>.</td></tr>
+        <tr><td><strong>guild.archive</strong></td><td>Daily cron — 2:00 UTC — checks all Free-plan guilds where <code>last_activity_at &lt; NOW() - 90 days</code></td><td>Serializes all guild rows across all schemas to compressed JSON with schemaVersion field. Writes archive to R2 at <code>archives/{guildId}/{timestamp}.json.gz</code>. Records metadata in <code>internal.archived_guilds</code>. Then hard-deletes all guild rows from live Postgres schemas in FK-safe order: child schemas first (<code>analytics</code>, <code>usage</code>, <code>ingested</code>), then <code>config</code> overrides, then <code>core</code> last — wrapped in a single Postgres transaction. <strong>Ordering matters:</strong> R2 write must succeed before the Postgres delete begins. If R2 write fails, abort — guild data untouched. If the Postgres delete fails after a successful R2 write, the archive file is orphaned in R2 but guild data remains intact in Postgres — safe to retry. <strong>Orphaned file detection:</strong> a periodic admin job compares <code>internal.archived_guilds.r2_key</code> entries against R2 keys to surface any orphaned files from partial runs — these can be deleted or retried manually. R2 and Postgres are not transactionally coupled; the job is written to be safe on partial failure in either direction. Written to <code>internal.audit_log</code>.</td></tr>
+        <tr><td><strong>data_visible_from.recalculate</strong></td><td>Daily cron — 1:00 UTC</td><td>Recalculates and writes <code>data_visible_from</code> for all Free-plan guilds using <code>NOW() - INTERVAL '30 days'</code>. Prevents window drift — without this, a static timestamp set at plan-change time grows stale over time. Supporter guilds have <code>data_visible_from = NULL</code> — no drift possible, they are excluded entirely. Runs before the <code>guild.inactivity-warn</code> and <code>guild.archive</code> crons. Per-guild overrides in <code>config.guild_config_overrides</code> are respected — if an override exists for <code>DATA_VISIBILITY_DAYS</code>, that value is used instead of the plan default. After writing, <code>has_older_data</code> is recalculated synchronously for any row where <code>data_visible_from</code> changed.</td></tr>
+        <tr><td><strong>patreon.sync</strong></td><td>Nightly cron — 3:00 UTC</td><td>Safety net for missed Patreon webhooks. For each active <code>core.supporter_links</code> row: joins to <code>core.user_integrations</code> via <code>supporter_links.user_id</code> (where <code>integration_type = 'PATREON'</code>) to retrieve the stored OAuth token. Refreshes the token if near expiry, then queries the Patreon API to verify the pledge is still active. If the pledge is absent or lapsed, revokes the link immediately — guild plan drops to Free if no other active supporters remain. Token refresh failures are logged and flagged in the admin UI. Reconciliation log written to <code>internal.audit_log</code>.</td></tr>
+        <tr><td><strong>notifications.reminder</strong></td><td>Future-dated Inngest event published when a raid event is created or updated. Uses <code>inngest.send</code> with a calculated delay: <code>event_start - reminder_offset</code> (reminder offset configured per guild in <code>bot_config</code>). If a raid event is rescheduled or cancelled, the original Inngest event is cancelled by ID and a new one published if still applicable. Inngest event ID keyed on <code>reminder:{raidEventId}</code> — ensures at most one pending reminder per raid event at any time. <strong>Cancellation is best-effort</strong> — if the reminder fires during the cancellation window before the cancel takes effect, the pre-send existence check is the authoritative safety net, not the cancellation. <strong>Reschedule edge case:</strong> the pre-send check must also verify that <code>event_start</code> has not changed since the reminder was scheduled — if the event was rescheduled, the reminder fires at the old time with stale timing. On mismatch, the reminder is suppressed; the new Inngest event (published at reschedule time) delivers the correct reminder.</td><td>Sends the Discord message directly via Discord REST API using the platform bot token (env var on the Northflank worker service — same pattern as other platform credentials). No WebSocket connection required for REST calls. Does not route through the bot process. Checks that the raid event still exists, is not cancelled, and has not been rescheduled before sending.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 14 Admin UI -->
+  <section class="section" id="s14">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">15</span>
+        <h2 class="section-title">Admin UI</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="section-intro">apps/admin — separate Next.js app on Northflank (or locked-down Vercel project). Google OAuth auth. Single flat admin role to start — differentiated roles for engineering, support, and sales added later. Every action performed in the admin UI is written to the audit log without exception. All admin UI procedures use <code>internalAdminProcedure</code> — this is the platform-level service role and is entirely distinct from <code>guildAdminProcedure</code>, which is a guild-user permission level (see Section 09).</div>
+    <div class="sub">
+      <div class="sub-title">Engineering Scope</div>
+      <table class="kv-table">
+        <tr><td>Feature flags</td><td>View all features, default states, plan requirements, rollout percentages. Adjust rollout % for gradual releases. Kill switch (set to 0%) without a deploy.</td></tr>
+        <tr><td>Service tokens</td><td>Issue, rotate, and revoke service tokens for bot, workers, and internal tooling.</td></tr>
+        <tr><td>Audit log</td><td>Full searchable audit trail of all admin UI actions across all guilds — plan/limit overrides, sales grants, cross-guild operations, archival events. This is <code>internal.audit_log</code> — your team only. Guild-facing configuration history lives in <code>core.guild_audit_log</code> and is readable by guild managers in the web app.</td></tr>
+        <tr><td>Manual job triggers</td><td>Trigger Inngest jobs manually — force a WCL sync, run retention cleanup, reprocess a failed webhook.</td></tr>
+        <tr><td>System health</td><td>Redis key stats, DB connection pool status, Inngest job failure rates, service uptime.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Support Scope</div>
+      <table class="kv-table">
+        <tr><td>Guild lookup</td><td>Search guilds by name, Discord guild ID, or owner. View full guild state: plan, supporter link status, feature flags, current usage vs limits.</td></tr>
+        <tr><td>Usage overrides</td><td>Grant temporary limit increases or plan benefit overrides for a guild with an expiry date and reason. Writes to <code>config.guild_config_overrides</code> — covers both consumable quota limits (e.g. <code>RAID_EVENTS_PER_MONTH</code>) and numeric plan benefits (e.g. <code>DATA_VISIBILITY_DAYS</code>). Auto-expires — no manual cleanup.</td></tr>
+        <tr><td>Feature overrides</td><td>Enable or disable a specific feature for a specific guild. Grant temporary beta access.</td></tr>
+        <tr><td>Supporter state</td><td>View active <code>supporter_links</code> rows for a guild — which users are backing it, Patreon connection status, and pledge verification timestamps. Read-only. Manual revocation available for support cases (e.g. fraudulent pledge).</td></tr>
+        <tr><td>Data lookup</td><td>Read-only access to guild config, roster, WCL sync history (<code>ingested.wcl_reports</code>), and usage history for debugging reported issues.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Sales Scope</div>
+      <table class="kv-table">
+        <tr><td>Limit overrides</td><td>Bump a specific quota limit or plan benefit for a guild during outreach or onboarding — "we can unlock that for you right now." Writes to <code>config.guild_config_overrides</code> with an optional expiry.</td></tr>
+        <tr><td>Feature overrides</td><td>Enable specific Supporter features for a guild temporarily — e.g. to let a guild evaluate automation before their first supporter pledges. Writes a Flagsmith guild override with expiry. Does not affect usage limits.</td></tr>
+        <tr><td>Conversion data</td><td>View guilds approaching their free plan raid limit (upgrade candidates), recently inactive guilds, and plan distribution across the install base.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 15 Plans -->
+  <section class="section" id="s15">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">16</span>
+        <h2 class="section-title">Plans</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Two plans — Free and Supporter. No pricing tiers, no billing in Arel. Supporter status is earned via Patreon.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Free</div>
+      <table class="kv-table">
+        <tr><td>Price</td><td><strong>$0.</strong> No account or payment required beyond Discord login.</td></tr>
+        <tr><td>Pitch</td><td>Get your raid off the ground.</td></tr>
+        <tr><td>Description</td><td>Post events, collect signups, and build your roster. Shared scheduling and roster tools your whole leadership team can edit together.</td></tr>
+        <tr><td>Raid lead seats</td><td>2</td></tr>
+        <tr><td>Raids per month</td><td>8 (calendar month — resets on the 1st). Warned at 6, blocked at 8.</td></tr>
+        <tr><td>Data visibility</td><td>30 days</td></tr>
+        <tr><td>Conversion trigger</td><td>A guild raiding twice a week hits the ceiling within a month. The path to Supporter is natural — one guild member pledging on Patreon unlocks the guild.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Supporter</div>
+      <table class="kv-table">
+        <tr><td>How granted</td><td>At least one active Patreon supporter has linked this guild via their Arel profile. Guild status is live as long as any supporter link is active.</td></tr>
+        <tr><td>Pitch</td><td>Less admin. More pulls.</td></tr>
+        <tr><td>Description</td><td>Everything in Free, plus unlimited raids, scheduling automation, recurring reminders, smart roster suggestions, and early access to new features. Unlimited raid lead seats.</td></tr>
+        <tr><td>Raid lead seats</td><td>Unlimited</td></tr>
+        <tr><td>Raids per month</td><td>Unlimited</td></tr>
+        <tr><td>Data visibility</td><td>Full history</td></tr>
+        <tr><td>Multiple supporters</td><td>Any number of Patreon supporters can link the same guild. Guild retains Supporter status as long as at least one active link exists.</td></tr>
+        <tr><td>Revocation</td><td>If a supporter's pledge lapses, their link is removed immediately. Guild drops to Free only if no other active supporters remain.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 16 Subscriptions -->
+  <section class="section" id="s16">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">17</span>
+        <h2 class="section-title">Supporter Model</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">Patreon OAuth per user. Arel verifies pledge status directly — no payment processing in Arel.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">How It Works</div>
+      <table class="kv-table">
+        <tr><td>Connect Patreon</td><td>User goes to their <strong>personal profile</strong> in Arel and connects their Patreon account via OAuth. Arel stores the Patreon access token and member ID against the Arel user, then verifies an active pledge to the Arel campaign via the Patreon API.</td></tr>
+        <tr><td>Select a guild</td><td>On confirmed pledge, the user selects which guild they want to support. One active guild at a time. Selection is locked for the current calendar month — a switch request mid-month writes a pending <code>supporter_links</code> row with <code>effective_month</code> set to the 1st of the following month. The current active link remains in effect until then. On the 1st, the current row is revoked and the pending row becomes active. If the user changes their pending selection before the 1st, the pending row is upserted — last write wins, no additional rows created.</td></tr>
+        <tr><td>Guild status</td><td>Guild plan is stored as <code>plan_id</code> on <code>core.subscriptions</code> and kept in sync by the API service. Multiple supporters can back the same guild — <code>plan_id</code> stays <code>'supporter'</code> as long as at least one active link exists.</td></tr>
+        <tr><td>Lapse / cancellation</td><td>Patreon webhook fires on pledge delete or payment failure. Arel revokes all <code>supporter_links</code> rows for the user immediately — both the current active row and any pending row for next month (identified by <code>revoked_at IS NULL</code> for the user). If no other active links exist for the affected guild, <code>guild.downgrade</code> fires. Nightly <code>patreon.sync</code> polls the Patreon API as a safety net for missed webhooks.</td></tr>
+        <tr><td>No billing in Arel</td><td>Arel never handles payment details, invoices, or subscription state. All of that lives in Patreon. Arel only verifies pledge status via the Patreon API.</td></tr>
+        <tr><td>Discord bonus</td><td>Optionally, Patreon's native Discord integration can assign a supporter role in the Arel Discord server automatically. This is a community perk — not used for verification. Verification is always via Patreon OAuth.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">core.supporter_links Schema</div>
+      <div class="code-block">-- core.supporter_links
+id                  uuid PRIMARY KEY
+user_id             text           -- FK to core.users (Arel user)
+guild_id            text           -- FK to core.guilds — guild receiving supporter perks
+patreon_member_id   text           -- matches core.users.patreon_member_id — denormalized for webhook lookup
+effective_month          date           -- YYYY-MM-01. The calendar month this row is in effect for.
+                                   -- Current active row: effective_month = current month's 1st.
+                                   -- Pending switch row: effective_month = next month's 1st.
+                                   --   On the 1st: current row is revoked, pending row becomes active.
+                                   --   If user changes their mind before the 1st: the pending row
+                                   --   is upserted (guild_id replaced) — last write wins.
+                                   --   Upsert targets WHERE revoked_at IS NULL AND effective_month = <next_month_1st>
+                                   --   — matches only the pending row, never the current active row.
+                                   --   Partial unique index on (user_id, effective_month) WHERE revoked_at IS NULL
+                                   --   enforces one active selection per user per month.
+                                   --   The upsert targets (user_id, effective_month = next_month_1st, revoked_at IS NULL)
+                                   --   — scoped to next month's 1st, so it never matches the current active row.
+                                   --   Revoked rows are unconstrained — multiple revoked rows per month allowed.
+revoked_at          timestamptz    -- null = active. Non-null = revoked. Source of truth for link status.
+revoked_reason      text           -- 'WEBHOOK' | 'SYNC_JOB' | 'ADMIN'
+created_at          timestamptz
+updated_at          timestamptz
+
+-- Partial unique index — enforces one active selection per user per month.
+-- Revoked rows are not constrained: a user may accumulate multiple revoked rows
+-- for the same month (e.g. resubscription after lapse, or mid-month guild switch
+-- where the previous pending row is revoked and a new one inserted).
+-- The upsert on pending switch targets this index with effective_month = next month's 1st:
+--   UPDATE ... WHERE revoked_at IS NULL AND effective_month = <next_month_1st>
+-- This ensures the upsert only matches the pending row — never the current active row
+-- (which has effective_month = this month's 1st).
+UNIQUE (user_id, effective_month) WHERE revoked_at IS NULL
+
+-- Active link query: WHERE revoked_at IS NULL
+-- Guild plan check: SELECT EXISTS (SELECT 1 FROM core.supporter_links WHERE guild_id = ? AND revoked_at IS NULL)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Patreon OAuth & Token Storage</div>
+      <table class="kv-table">
+        <tr><td>OAuth flow</td><td>Standard OAuth 2.0 authorization code flow. Initiated from the user's Arel profile. On callback, Arel exchanges the code for access + refresh tokens, verifies active pledge via <code>GET /identity?include=memberships</code>, and writes the <code>supporter_links</code> row on success.</td></tr>
+        <tr><td>Token storage</td><td>Access and refresh tokens stored in <code>core.user_integrations</code> (<code>integration_type = 'PATREON'</code>), encrypted at the application layer. Never logged, never returned to clients.</td></tr>
+        <tr><td>Token refresh</td><td>Patreon access tokens expire. The <code>patreon.sync</code> nightly job refreshes tokens before checking pledge status. Refresh failures are logged and flagged in the admin UI.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Webhook Handler</div>
+      <table class="kv-table">
+        <tr><td>Events handled</td><td><code>members:pledge:delete</code> — pledge cancelled. <code>members:pledge:update</code> — covers payment decline / lapse. Handler on Northflank API service.</td></tr>
+        <tr><td>Resolution</td><td>Webhook payload includes Patreon member ID. Arel looks up all <code>supporter_links</code> rows for the matching user (via <code>core.users.patreon_member_id</code>) where <code>revoked_at IS NULL</code> — revokes all of them (current active row and any pending future row). Fires <code>guild.downgrade</code> for any affected guild with no remaining active links.</td></tr>
+        <tr><td>Idempotency</td><td>Handler checks current row state before writing — revoking an already-revoked link is a no-op. Safe to replay.</td></tr>
+        <tr><td>Safety net</td><td>Nightly <code>patreon.sync</code> polls Patreon API for all active supporter links to catch missed webhooks and refresh tokens.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Guild Plan Resolution</div>
+      <div class="body-text">A guild's plan is stored as <code>plan_id</code> on <code>core.subscriptions</code> and kept in sync by the API service. Enforcement middleware reads <code>plan_id</code> directly — it is the authoritative value at request time. When the Redis guild cache (<code>cache:guild:{guildId}</code>) expires or is busted, it is rebuilt by reading <code>core.subscriptions.plan_id</code> — no re-derivation from <code>supporter_links</code>, no re-write to <code>core.subscriptions</code>. <code>plan_id</code> is already correct; the cache is just a performance read-through. <code>core.supporter_links</code> is the source of truth for <em>why</em> the guild holds a given plan — used for display and audit, not for runtime enforcement. TTL 5 min; busted immediately on any supporter link change or plan transition.</div>
+    </div>
+  </section>
+
+  <!-- 17 Data Lifecycle -->
+  <section class="section" id="s17">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">18</span>
+        <h2 class="section-title">Data Lifecycle</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Guild States</div>
+      <div class="body-text">A guild moves through distinct states. Each state has defined access, data visibility, and inactivity behavior.</div>
+      <table class="data-table">
+        <tr><th>State</th><th>Trigger</th><th>Access</th><th>Data</th></tr>
+        <tr><td><strong>Active (supporter)</strong></td><td>One or more active supporter links exist for this guild</td><td>Full Supporter plan access</td><td>Full history</td></tr>
+        <tr><td><strong>Active (free)</strong></td><td>No active supporter links — never had one, or all links revoked</td><td>Free plan features and quotas</td><td>30-day window visible. All data retained.</td></tr>
+        <tr><td><strong>Inactive</strong></td><td>90 days with no qualifying activity</td><td>None — guild marked for archival</td><td>Exported to R2 cold storage, then hard-deleted from Postgres</td></tr>
+        <tr><td><strong>Archived</strong></td><td>Archival job completes</td><td>None</td><td>Compressed JSON archive in R2. Restorable by engineering. Record in <code>internal.archived_guilds</code>.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Supporter Revocation Flow</div>
+      <table class="kv-table">
+        <tr><td>On pledge lapse</td><td>Patreon webhook fires <code>members:pledge:delete</code> — Arel revokes the <code>core.supporter_links</code> row immediately.</td></tr>
+        <tr><td>Guild impact</td><td>If the guild has other active supporter links, no change. If this was the last active link, <code>guild.downgrade</code> fires — guild drops to Free immediately. No grace period.</td></tr>
+        <tr><td>Data</td><td>No data deleted on downgrade. 30-day visibility window applies from next query. All data retained in Postgres.</td></tr>
+        <tr><td>Re-linking</td><td>If the user resubscribes on Patreon, their Patreon OAuth connection in Arel remains — they re-link a guild from their profile. Calendar month lock applies to the new selection.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Inactivity &amp; Archival</div>
+      <div class="body-text">Applies to guilds in Free plan state only — Supporter guilds are exempt regardless of activity level. When a guild loses Supporter status and drops to Free, <code>guild.downgrade</code> writes <code>last_plan_change_at = NOW()</code> on <code>core.guilds</code>, which feeds into the <code>last_activity_at</code> generated column — giving the guild a full 90 days from downgrade before archival risk. For always-free guilds, the clock starts at <code>created_at</code>. A guild that installs and never completes onboarding will be warned and archived on the same schedule — this is also a re-engagement opportunity.</div>
+      <table class="kv-table">
+        <tr><td>Qualifying activity</td><td>Any of: tRPC mutation or meaningful web interaction (<code>last_web_activity_at</code>), bot command or Discord event processed (<code>last_bot_activity_at</code>), raid event created or updated (<code>last_raid_event_updated_at</code>), plan change (<code>last_plan_change_at</code>). Any of these resets the inactivity clock via the <code>last_activity_at</code> generated column.</td></tr>
+        <tr><td>Clock source</td><td><code>core.guilds.last_activity_at</code> — generated column, always reflects the maximum of the four activity columns, falling back to <code>created_at</code>.</td></tr>
+        <tr><td>Inactivity threshold</td><td>90 days with no qualifying activity.</td></tr>
+        <tr><td>Warnings</td><td>Three escalating emails sent at 60, 75, and 87 days of inactivity — giving 30, 15, and 3 days notice respectively. Each email states exactly how many days remain and what action resets the clock.</td></tr>
+        <tr><td>Archival (soft delete)</td><td><code>guild.archive</code> job runs at day 90. R2 write first — serializes all guild rows to compressed JSON, writes to R2 at <code>archives/{guildId}/{timestamp}.json.gz</code>. If R2 write fails, abort. On R2 success: hard-deletes all guild rows in FK-safe order (<code>analytics</code>, <code>usage</code>, <code>ingested</code>, then <code>config</code> overrides, then <code>core</code> last) in a single Postgres transaction. If Postgres delete fails, archive file is orphaned in R2 but guild data is intact — safe to retry. Records metadata in <code>internal.archived_guilds</code>. DB stays lean.</td></tr>
+        <tr><td>Restoration</td><td>Manual engineering operation. Internal admin locates the archive via <code>internal.archived_guilds</code>, runs restore script against the R2 file. Archive includes a <code>schemaVersion</code> field so the restore script can handle schema changes since archival.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">internal.archived_guilds</div>
+      <div class="body-text">The index of all archived guilds. Kept in Postgres permanently — small, fast, queryable. The archive file itself lives in R2.</div>
+      <div class="code-block">-- internal.archived_guilds
+id             uuid
+guild_id       text          -- original guildId
+guild_name     text          -- denormalized for human readability
+archived_at    timestamptz
+reason         text          -- 'INACTIVITY_90D', 'MANUAL', etc.
+r2_key         text          -- full R2 path to archive file
+schema_version text          -- app version at time of archival
+restorable     boolean       -- false if archive is corrupted or expired
+restored_at    timestamptz   -- null unless restored
+restored_by    text          -- internal admin userId if restored</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Data Retention vs Data Visibility</div>
+      <div class="body-text"><strong>Retention</strong> is how long Arel keeps data. <strong>Visibility</strong> is how far back a guild can see their own data. These are independent — a guild on the Free plan has 30 days of visibility, but their older data is still retained in Postgres. It is never deleted on downgrade. The only event that permanently removes guild data is archival (90 days of inactivity), which hard-deletes everything.</div>
+      <table class="kv-table">
+        <tr><td>Retention</td><td>All guild data is retained indefinitely until archival. Plan changes never delete data. A guild that loses Supporter status and drops to Free loses visibility into their older data — they do not lose the data itself. If supporter status is restored, their full history reappears immediately with no migration required.</td></tr>
+        <tr><td>Visibility</td><td>Controlled by <code>data_visible_from</code> on <code>core.guilds</code> — a stored timestamptz used as an indexed cutoff on all ingested data queries (<code>AND occurred_at &gt;= data_visible_from</code>). Set at the moment of plan change by the plan-change or <code>guild.downgrade</code> job, and recalculated daily by <code>data_visible_from.recalculate</code> to prevent window drift (see Section 13). <code>NULL</code> means no cutoff — Supporter plan. Default values per plan are defined in <code>config.plan_benefits</code> seed data. Per-guild overrides via <code>config.guild_config_overrides</code>.</td></tr>
+        <tr><td>Free</td><td>30-day lookback. <code>data_visible_from</code> set to <code>NOW() - 30 days</code> at plan assignment.</td></tr>
+        <tr><td>Supporter</td><td>Unlimited. <code>data_visible_from = NULL</code> — no filter applied.</td></tr>
+        <tr><td>has_older_data</td><td>Recalculated synchronously immediately after <code>data_visible_from</code> is written, via <code>SELECT EXISTS</code> across <code>ingested.wcl_reports</code>, <code>wcl_attendance</code>, and <code>wcl_kills</code> (and any future ingested tables). When <code>true</code>, the UI shows an upgrade CTA — "You have raid history beyond your current window" — rather than an empty state. Prevents a downgraded guild from thinking their data is gone.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 18 Integrations -->
+  <section class="section" id="s18">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">19</span>
+        <h2 class="section-title">Integrations</h2>
+        <div class="section-rule"></div>
+      </div>
+      <div class="section-sub">External API sync pattern, credential storage, and current integrations.</div>
+    </div>
+    <div class="section-intro">Integrations pull data from external APIs into the ingested schema. The hot path (user-facing tRPC queries) never calls external APIs directly — it reads from the local copy. All sync is triggered asynchronously via Inngest — never inline in a tRPC handler or bot event.</div>
+    <div class="sub">
+      <div class="sub-title">Sync Pattern</div>
+      <table class="kv-table">
+        <tr><td>Trigger model</td><td>Event-driven, not polled. Each sync is a discrete action against a specific external resource — triggered by a human action or a bot-detected signal. No background polling loops.</td></tr>
+        <tr><td>Hot path isolation</td><td>tRPC queries read only from the local ingested schema. External API calls happen only inside Inngest sync jobs — never on the request path.</td></tr>
+        <tr><td>Deduplication</td><td>Each ingested table carries a <code>UNIQUE</code> constraint on the natural key (e.g. <code>guild_id, wcl_code</code>). Importing the same resource twice is a no-op — upsert on conflict.</td></tr>
+        <tr><td>Concurrency</td><td>Distributed Redis lock per guild per integration type. Prevents duplicate sync jobs for the same guild running in parallel.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Credential Storage</div>
+      <div class="body-text">Per-guild integration credentials are stored in <code>core.guild_integrations</code> — encrypted at the application layer before writing, one row per guild per integration type. The encryption key lives in the API service environment (Northflank env var). No credential is stored in plaintext or in environment variables of other services. Whether WCL requires per-guild credentials depends on report visibility — see Deferred Decisions.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Warcraft Logs</div>
+      <table class="kv-table">
+        <tr><td>API type</td><td>GraphQL API.</td></tr>
+        <tr><td>Sync trigger</td><td>Bot watches a guild-configured Discord channel for WCL report URLs. On <code>MESSAGE_CREATE</code>, the bot detects a WCL URL via regex, extracts the report code, and publishes an Inngest event. The <code>sync.wcl</code> worker fetches the report and writes to the ingested schema. No polling — guilds trigger import by doing what they already do: posting the log link in Discord after a raid.</td></tr>
+        <tr><td>WCL channel config</td><td>A single Discord channel ID stored in <code>bot_config</code> per guild. Configured by a guild admin in the web app. The bot only watches this channel for WCL URLs — not all channels.</td></tr>
+        <tr><td>Credentials</td><td>Deferred — see Deferred Decisions. WCL public reports may be fetchable without per-guild auth using a platform-level WCL API key, which would eliminate integration setup friction entirely.</td></tr>
+        <tr><td>Data scope</td><td>Attendance and kill records only. No performance metrics, rankings, damage numbers, or death logs — those stay in WCL.</td></tr>
+        <tr><td>Data stored</td><td><code>ingested.wcl_reports</code>, <code>ingested.wcl_attendance</code>, <code>ingested.wcl_kills</code>. No sync cursor — each import is report-scoped and idempotent.</td></tr>
+        <tr><td>Concurrency</td><td>Redis distributed lock per guild — prevents duplicate imports if the same link is posted twice in quick succession.</td></tr>
+      </table>
+      <div class="code-block">-- ingested.wcl_reports
+id              uuid PRIMARY KEY
+guild_id        text
+wcl_code        text           -- WCL report code (unique per report)
+title           text
+zone            text           -- raid instance name
+difficulty      text           -- 'normal' | 'heroic' | 'mythic'
+started_at      timestamptz
+ended_at        timestamptz
+synced_at       timestamptz
+UNIQUE (guild_id, wcl_code)
+
+-- ingested.wcl_attendance
+id              uuid PRIMARY KEY
+guild_id        text
+wcl_report_id   uuid           -- FK to wcl_reports
+player_name     text           -- character name at time of raid
+spec            text           -- spec at time of raid
+role            text           -- 'tank' | 'healer' | 'dps'
+occurred_at     timestamptz    -- report started_at — used for data_visible_from filter
+UNIQUE (guild_id, wcl_report_id, player_name)  -- idempotent upsert: same player appears once per report
+
+-- ingested.wcl_kills
+id              uuid PRIMARY KEY
+guild_id        text
+wcl_report_id   uuid           -- FK to wcl_reports
+boss_name       text
+difficulty      text           -- 'normal' | 'heroic' | 'mythic'
+killed_at       timestamptz    -- timestamp of kill within the report
+occurred_at     timestamptz    -- same as killed_at — used for data_visible_from filter
+UNIQUE (guild_id, wcl_report_id, boss_name, difficulty)</div>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Incoming Webhooks</div>
+      <table class="kv-table">
+        <tr><td>Handler location</td><td>Northflank API service — consistent with Patreon and Discord webhook handling.</td></tr>
+        <tr><td>Verification</td><td>Signature verified before any processing. Unverified payloads rejected immediately.</td></tr>
+        <tr><td>Processing</td><td>Webhook handler writes to DB or publishes Inngest event. Does not process inline — always async.</td></tr>
+      </table>
+    </div>
+    <div class="sub">
+      <div class="sub-title">Future Integrations</div>
+      <div class="body-text">Additional API-based integrations follow the same pattern: <code>sync.integration</code> Inngest job, data written to a new table group in the <code>ingested</code> schema, sync cursor tracked per integration if needed, usage counted against guild quota. The infrastructure is in place — adding a new integration is a schema migration + a new job handler.</div>
+    </div>
+  </section>
+
+  <!-- 19 Rules -->
+  <section class="section" id="s19">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">20</span>
+        <h2 class="section-title">Architectural Rules</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text">These are enforced as team conventions and, where possible, as structural lint rules. Violations require explicit team discussion — not unilateral workarounds.</div>
+    <div class="rules-list">
+      <div class="rule-item"><span class="rule-num">01</span><div><strong>guildId from session only.</strong> Never accepted from request payload. Injected by the API context factory. No exception.</div></div>
+      <div class="rule-item"><span class="rule-num">02</span><div><strong>packages/db imported only by apps/api.</strong> Enforced via ESLint import boundary. apps/app and apps/bot never touch Prisma directly.</div></div>
+      <div class="rule-item"><span class="rule-num">03</span><div><strong>Business logic lives in apps/api.</strong> The web app and bot are consumers. No business logic, validation rules, or permission checks duplicated in apps/app or apps/bot.</div></div>
+      <div class="rule-item"><span class="rule-num">04</span><div><strong>Bot traffic never hits Vercel.</strong> Discord events are processed by apps/bot on Northflank. Results written to DB via API service. Zero bot-generated Vercel invocations.</div></div>
+      <div class="rule-item"><span class="rule-num">05</span><div><strong>Webhooks handled on Northflank.</strong> Patreon, Discord, and all external service webhooks go to the API service. Not Vercel functions.</div></div>
+      <div class="rule-item"><span class="rule-num">06</span><div><strong>Files served directly from R2.</strong> Never proxied through Next.js routes. R2 URLs given directly to the client.</div></div>
+      <div class="rule-item"><span class="rule-num">07</span><div><strong>Redis data is always reconstructible.</strong> Nothing stored only in Redis that cannot be rebuilt from Postgres. Redis is a performance layer, not a source of truth.</div></div>
+      <div class="rule-item"><span class="rule-num">08</span><div><strong>Plan, feature, and limit enforcement is middleware.</strong> Never checked inline in route handlers or business logic. The procedure hierarchy is the enforcement point.</div></div>
+      <div class="rule-item"><span class="rule-num">09</span><div><strong>User-initiated bot commands pass userId.</strong> The human is accountable, not the service. Audit log records the user, not "the bot."</div></div>
+      <div class="rule-item"><span class="rule-num">10</span><div><strong>Every admin action is audit logged.</strong> INTERNAL_ADMIN service role triggers audit middleware on every procedure. No exceptions, no opt-outs.</div></div>
+      <div class="rule-item"><span class="rule-num">11</span><div><strong>Service tokens are DB records.</strong> Not hardcoded environment variables. Rotatable and revocable without a redeploy.</div></div>
+      <div class="rule-item"><span class="rule-num">12</span><div><strong>Plan and limit definitions are seed data.</strong> Changing quotas or plan capabilities never requires a code deploy. Update the DB record, bust the cache.</div></div>
+      <div class="rule-item"><span class="rule-num">13</span><div><strong>Hot path never calls external APIs.</strong> tRPC queries read from the local ingested schema. External API calls happen only in Inngest sync jobs.</div></div>
+      <div class="rule-item"><span class="rule-num">14</span><div><strong>Northflank and Vercel are siblings.</strong> They share infrastructure (Postgres, Redis) — they do not call each other for data operations. Coordination via shared DB or event queue only.</div></div>
+      <div class="rule-item"><span class="rule-num">15</span><div><strong>Integration credentials use application-level encryption.</strong> Tokens in <code>core.guild_integrations</code> and <code>core.user_integrations</code> are encrypted by the API service before writing and decrypted after reading. Encryption key stored as an environment variable on Northflank — not in the DB. Never logged, never returned to clients. Key is migratable to a KMS without changing the app interface.</div></div>
+      <div class="rule-item"><span class="rule-num">16</span><div><strong>Bot user-initiated procedures always resolve the triggering user's Arel role.</strong> Never assume permission from Discord role alone. The bot passes <code>triggerUserId</code> and the API resolves their role from the same Redis permission cache as the web client. A MEMBER cannot execute a <code>botRaidManagerProcedure</code> command regardless of what Discord shows them.</div></div>
+    </div>
+  </section>
+
+  <!-- 20 Deferred -->
+  <section class="section" id="s20">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">21</span>
+        <h2 class="section-title">Deferred Decisions</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text">Intentionally deferred — foundation is in place to support all of these when the time comes.</div>
+    <div class="deferred">
+      <div class="deferred-title">To Be Decided</div>
+      <ul>
+        <li>Patreon OAuth token storage details — <code>core.user_integrations</code> is defined as the home for Patreon access/refresh tokens, including <code>token_expires_at</code> and <code>status</code> fields (see Section 05). Exact refresh cadence and error recovery flow are to be finalized once the user/guild/event model is complete. The <code>patreon.sync</code> nightly job handles refresh in the interim.</li>
+        <li>Temporary Discord roles for raids — assign a Discord role to signed-up members automatically when a raid is confirmed; remove it after the raid concludes. Supporter feature. Requires Discord OAuth token with role management scope and a background job to clean up roles post-raid.</li>
+        <li>Intelligent signup nudges — automated Discord message triggered via Inngest when signups are below a configurable threshold within a set window before raid start. Supporter feature. Proactive rather than scheduled — reacts to signup state, not a fixed timer.</li>
+        <li>Guild timezone — the "end of day" boundary for same-day event delete logic currently uses UTC (<code>CURRENT_DATE</code> UTC). Guilds raid in their local timezone and a raid at 9pm EST deleted at 8pm EST is "today" in UTC but "not yet started" locally. A guild-configured timezone would make this boundary feel correct to users. Requires a <code>timezone</code> field on <code>core.guilds</code> and replacing <code>CURRENT_DATE</code> checks with <code>(NOW() AT TIME ZONE guild.timezone)::date</code>. Low complexity change — deferred until guilds request it or timezone confusion produces support load.</li>
+        <li>Admin UI IP allowlist — <code>apps/admin</code> should return 404 (not 401) for requests originating outside an allowlisted set of IP addresses. Exact implementation depends on final hosting decision (Northflank vs Vercel).</li>
+        <li>Admin UI deployment target — currently listed as "Northflank or locked-down Vercel project." Decision needed before production. Affects IP allowlist implementation approach.</li>
+        <li>Storage limits — <code>STORAGE_MB</code> removed as an active usage limit type. Replaced by a per-file size cap enforced at upload time. Aggregate storage enforcement deferred until storage costs become a concern.</li>
+        <li>Staging environment — per-PR preview isolation is in place (Section 04). A persistent staging environment (long-lived, production-like, seeded with realistic data) is planned but not yet configured.</li>
+        <li>Admin UI role differentiation — engineering / support / sales roles added after initial flat-role launch</li>
+        <li>First GUILD_ADMIN auto-grant — currently requires manual engineering action per new guild. Planned path: auto-grant the first GUILD_ADMIN seat to the Discord user who authorized the bot OAuth install at install time. Requires verifying the OAuth callback carries sufficient identity context and that the install flow is complete before writing the seat.</li>
+        <li><strong style="color:#c27070">Pre-implementation blocker.</strong> TimescaleDB on Neon availability — verify TimescaleDB extension is available on the chosen Neon plan and region before finalizing hypertable schema. If unavailable, fallback is native Postgres declarative partitioning — architecturally different enough to plan for. Confirm before first migration. <code>usage.usage_events</code> and <code>analytics</code> tables are designed as hypertables; the fallback affects both.</li>
+        <li><strong style="color:#c27070">Pre-implementation blocker.</strong> WCL credentials model — WCL public reports may be fetchable without per-guild auth using a platform-level WCL API key. If so, guilds would not need to connect a WCL account at all — integration setup friction drops to just configuring the watched Discord channel. Requires confirming WCL API access rules for public reports. If private reports need to be supported, per-guild OAuth is required. Decision affects <code>core.guild_integrations</code> WCL row necessity and onboarding flow.</li>
+        <li>Additional external integrations beyond Warcraft Logs — ingested schema pattern supports any API-based source. WCL is cursor-free (report-scoped, idempotent). Future integrations that require a sync cursor (e.g. polling a paginated API from a known offset) will need a cursor column — likely on <code>core.guild_integrations</code> (e.g. <code>sync_cursor jsonb</code>) or a dedicated <code>core.guild_integration_sync_state</code> table. Decision deferred until the first cursor-bearing integration is designed.</li>
+        <li>AI features — pgvector extension on Neon noted as extension point; no current requirement</li>
+        <li>GDPR / right to erasure — guild deletion covers the primary case; individual user erasure flow not yet designed</li>
+        <li>WoW in-game addon architecture — referenced in product but out of scope for this document</li>
+        <li>In-game addon ↔ API communication — will require its own auth token model</li>
+        <li>Search — Postgres FTS to start; Typesense if search performance becomes a concern</li>
+        <li>Public guild API — guild-scoped API keys allowing guild members and developers to build external tooling against Arel data (WeakAuras, spreadsheets, custom scripts). Requires: <code>core.guild_api_keys</code> table with hashed keys, scopes, and per-key rate limiting; a versioned public REST/GraphQL surface separate from the internal tRPC API. Foundation does not block this — no architectural changes needed when ready to build.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 21 Open Items -->
+  <section class="section" id="s22">
+    <div class="section-header">
+      <div class="section-header-row">
+        <span class="section-num">22</span>
+        <h2 class="section-title">Open Items</h2>
+        <div class="section-rule"></div>
+      </div>
+    </div>
+    <div class="body-text">No open items. All active gaps have been resolved. This document is considered complete and implementation-ready. Remaining decisions are captured in Deferred Decisions — two require resolution before first migration: <strong>TimescaleDB availability on Neon</strong> and <strong>WCL credentials model</strong> (both marked as pre-implementation blockers in Section 21).</div>
+  </section>
+
+  <footer style="border-top:1px solid var(--border);padding:40px 80px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-left:0">
+    <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver-dk)">Arel · Tools</div>
+    <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--rune)">Architecture Doc · v1.0 · March 2026</div>
+  </footer>
+</main>
+
+<script>
+const sections = Array.from(document.querySelectorAll('section[id], .cover[id]'));
+const links = document.querySelectorAll('.sidebar-sections a');
+
+function getActiveSection() {
+  const scrollY = window.scrollY + 80;
+  let active = sections[0];
+  for (const s of sections) {
+    if (s.offsetTop <= scrollY) active = s;
+    else break;
+  }
+  return active;
+}
+
+function updateNav() {
+  const active = getActiveSection();
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + active.id);
+  });
+}
+
+window.addEventListener('scroll', updateNav, { passive: true });
+updateNav();
+</script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DATABASE_DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  schemas           = ["core", "config", "usage", "ingested", "analytics", "internal"]
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum ArelRole {
+  MEMBER
+  RAID_MANAGER
+  GUILD_ADMIN
+
+  @@schema("core")
+}
+
+enum SeatType {
+  GUILD_ADMIN
+  RAID_MANAGER
+
+  @@schema("core")
+}
+
+enum ServiceRole {
+  app
+  api
+  bot
+  www
+  admin   // internal Admin UI (Arel team)
+  worker  // Inngest jobs / background tasks
+
+  @@schema("config")
+}
+
+// ─── core schema ─────────────────────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  discord_id        String    @unique
+  discord_username  String
+  discord_avatar    String?
+  patreon_member_id String?   @unique
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  owned_guilds          Guild[]          @relation("GuildOwner")
+  memberships           GuildMember[]
+  seats_held            GuildSeat[]      @relation("SeatHolder")
+  seats_granted         GuildSeat[]      @relation("SeatGranter")
+  service_tokens        ServiceToken[]
+
+  @@map("users")
+  @@schema("core")
+}
+
+model Guild {
+  id               String  @id @default(cuid())
+  discord_guild_id String  @unique
+  discord_name     String
+  discord_icon     String?
+  owner_user_id    String
+
+  // Activity tracking
+  last_web_activity_at       DateTime?
+  last_bot_activity_at       DateTime?
+  last_raid_event_updated_at DateTime?
+  last_plan_change_at        DateTime?
+  last_activity_at           DateTime? @default(dbgenerated("GREATEST(COALESCE(last_web_activity_at, created_at), COALESCE(last_bot_activity_at, created_at), COALESCE(last_raid_event_updated_at, created_at), COALESCE(last_plan_change_at, created_at))")) @db.Timestamptz @ignore // GENERATED ALWAYS AS STORED — managed via raw SQL
+
+  // Data visibility
+  data_visible_from DateTime?
+  has_older_data    Boolean   @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  owner          User               @relation("GuildOwner", fields: [owner_user_id], references: [id])
+  members        GuildMember[]
+  subscription   Subscription?
+  role_mappings  GuildRoleMapping[]
+  seats          GuildSeat[]
+  service_tokens ServiceToken[]
+  bot_config     BotConfig?
+
+  @@map("guilds")
+  @@schema("core")
+}
+
+model GuildMember {
+  guild_id      String
+  user_id       String
+  discord_roles String[]
+  joined_at     DateTime
+  updated_at    DateTime @updatedAt
+
+  guild Guild @relation(fields: [guild_id], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
+
+  @@id([guild_id, user_id])
+  @@map("guild_members")
+  @@schema("core")
+}
+
+model Subscription {
+  guild_id   String   @id
+  plan_id    String
+  status     String   @default("ACTIVE")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  guild Guild            @relation(fields: [guild_id], references: [id])
+  plan  SubscriptionPlan @relation(fields: [plan_id], references: [id])
+
+  @@map("subscriptions")
+  @@schema("core")
+}
+
+model GuildRoleMapping {
+  guild_id        String
+  discord_role_id String
+  arel_role       ArelRole
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  guild Guild @relation(fields: [guild_id], references: [id])
+
+  @@id([guild_id, discord_role_id])
+  @@map("guild_role_mappings")
+  @@schema("core")
+}
+
+model GuildSeat {
+  guild_id   String
+  user_id    String
+  seat_type  SeatType
+  granted_by String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  guild   Guild @relation(fields: [guild_id], references: [id])
+  user    User  @relation("SeatHolder", fields: [user_id], references: [id])
+  granter User  @relation("SeatGranter", fields: [granted_by], references: [id])
+
+  @@id([guild_id, user_id])
+  @@map("guild_seats")
+  @@schema("core")
+}
+
+// ─── config schema ───────────────────────────────────────────────────────────
+
+model ServiceToken {
+  id           String      @id @default(cuid())
+  guild_id     String
+  token_hash   String
+  label        String
+  role         ServiceRole
+  created_by   String
+  last_used_at DateTime?
+  expires_at   DateTime?
+  created_at   DateTime    @default(now())
+
+  guild   Guild @relation(fields: [guild_id], references: [id])
+  creator User  @relation(fields: [created_by], references: [id])
+
+  @@map("service_tokens")
+  @@schema("config")
+}
+
+model SubscriptionPlan {
+  id         String   @id
+  name       String
+  created_at DateTime @default(now())
+
+  subscriptions Subscription[]
+  limits        PlanLimit[]
+  benefits      PlanBenefit[]
+
+  @@map("subscription_plans")
+  @@schema("config")
+}
+
+model FeatureGroup {
+  id          String   @id @default(cuid())
+  parent_id   String?
+  name        String
+  description String?
+  created_at  DateTime @default(now())
+
+  parent   FeatureGroup?  @relation("GroupHierarchy", fields: [parent_id], references: [id])
+  children FeatureGroup[] @relation("GroupHierarchy")
+  features Feature[]
+
+  @@map("feature_groups")
+  @@schema("config")
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  group_id    String
+  name        String
+  description String?
+  is_ga       Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  group FeatureGroup @relation(fields: [group_id], references: [id])
+
+  @@map("features")
+  @@schema("config")
+}
+
+model PlanLimit {
+  plan_id   String
+  limit_key String
+  value     Int?
+
+  plan SubscriptionPlan @relation(fields: [plan_id], references: [id])
+
+  @@id([plan_id, limit_key])
+  @@map("plan_limits")
+  @@schema("config")
+}
+
+model PlanBenefit {
+  plan_id     String
+  benefit_key String
+  value       Int?
+
+  plan SubscriptionPlan @relation(fields: [plan_id], references: [id])
+
+  @@id([plan_id, benefit_key])
+  @@map("plan_benefits")
+  @@schema("config")
+}
+
+model BotConfig {
+  guild_id        String   @id
+  prefix          String   @default("!")
+  bot_enabled     Boolean  @default(true)
+  announce_events Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  guild Guild @relation(fields: [guild_id], references: [id])
+
+  @@map("bot_config")
+  @@schema("config")
+}

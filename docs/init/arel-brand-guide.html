@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Arel.tools — Brand & Style Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0d0f;--bg2:#111317;--bg3:#161820;
+  --surface:#1a1d24;--border:#2a2d36;
+  --rune:#7a8499;--muted:#8a909e;--silver-dk:#6e7585;
+  --silver:#b8bfcc;--silver-lt:#d4dae6;--text:#e8ecf2;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;overflow-x:hidden}
+
+/* ── Grid bg ── */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(180,195,215,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(180,195,215,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* ── Sidebar nav ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--bg2);border-right:1px solid var(--border);z-index:100;display:flex;flex-direction:column;padding:32px 0;overflow-y:auto}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 24px 28px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.sidebar-wordmark{font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:.14em;color:var(--silver-lt);text-transform:uppercase}
+.sidebar-wordmark span{display:block;font-size:10px;color:var(--silver-dk);font-weight:400;letter-spacing:.3em;margin-top:2px}
+.sidebar-sections{list-style:none;padding:0 12px}
+.sidebar-sections li a{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-left:2px solid transparent;transition:all .2s}
+.sidebar-sections li a:hover,.sidebar-sections li a.active{color:var(--silver);border-left-color:var(--silver-dk)}
+.sidebar-sections li a .num{font-family:'Cinzel',serif;font-size:9px;color:var(--border);width:16px;flex-shrink:0}
+.sidebar-sections .group{padding:16px 12px 4px;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--border)}
+
+/* ── Main ── */
+main{margin-left:240px;position:relative;z-index:1;min-height:100vh}
+
+/* ── Cover ── */
+.cover{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:80px 80px 80px;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.cover-glow{position:absolute;top:0;right:0;width:700px;height:500px;background:radial-gradient(ellipse at 70% 30%,rgba(150,170,200,.06) 0%,transparent 65%);pointer-events:none}
+.cover-mark{position:absolute;right:80px;top:50%;transform:translateY(-50%);opacity:.06}
+.cover-eyebrow{font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--silver-dk);margin-bottom:16px}
+.cover-title{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(40px,5vw,72px);letter-spacing:.06em;text-transform:uppercase;line-height:1;background:linear-gradient(150deg,#e8ecf2 30%,#7a8499 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.cover-sub{font-size:15px;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:40px}
+.cover-meta{display:flex;gap:32px}
+.cover-meta-item{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rune)}
+.cover-meta-item span{display:block;color:var(--silver-dk);margin-top:4px}
+
+/* ── Sections ── */
+.section{padding:80px 80px;border-bottom:1px solid var(--border);max-width:1080px}
+.section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:48px}
+.section-num{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.3em;color:var(--border)}
+.section-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--silver-lt);letter-spacing:.06em;text-transform:uppercase}
+.section-rule{flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent);margin-left:16px;align-self:center}
+
+/* ── Sub-section ── */
+.sub{margin-bottom:48px}
+.sub-title{font-family:'Cinzel',serif;font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--silver-dk);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.body-text{font-size:14px;color:var(--muted);line-height:1.8;max-width:660px;margin-bottom:12px}
+.body-text strong{color:var(--silver);font-weight:500}
+.body-text em{font-style:normal;color:var(--silver-lt)}
+
+/* ── Key-value table ── */
+.kv-table{width:100%;border-collapse:collapse;margin-bottom:24px;max-width:780px}
+.kv-table tr{border-bottom:1px solid var(--border)}
+.kv-table tr:last-child{border-bottom:none}
+.kv-table td{padding:10px 16px;font-size:13px;vertical-align:top}
+.kv-table td:first-child{width:200px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--rune);white-space:nowrap;padding-right:24px}
+.kv-table td:last-child{color:var(--muted);line-height:1.7}
+.kv-table td:last-child strong{color:var(--silver-lt);font-weight:500}
+
+/* ── Swatches ── */
+.swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-bottom:24px;max-width:780px}
+.swatch{}
+.swatch-block{height:56px;width:100%}
+.swatch-info{background:var(--surface);border:1px solid var(--border);padding:8px 10px}
+.swatch-name{font-size:11px;font-weight:500;color:var(--silver);margin-bottom:2px}
+.swatch-hex{font-family:'Courier New',monospace;font-size:10px;color:var(--muted)}
+.swatch-role{font-size:10px;color:var(--rune);margin-top:2px;line-height:1.4}
+
+/* ── Do/Dont ── */
+.do-dont{display:grid;grid-template-columns:1fr 1fr;gap:2px;max-width:780px;margin-bottom:24px}
+.do-col,.dont-col{background:var(--surface);border:1px solid var(--border);padding:24px}
+.do-col .col-head{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#6aaa64;margin-bottom:16px;font-family:'Cinzel',serif}
+.dont-col .col-head{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#c27070;margin-bottom:16px;font-family:'Cinzel',serif}
+.do-col ul,.dont-col ul{list-style:none;padding:0}
+.do-col li,.dont-col li{font-size:13px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.do-col li:last-child,.dont-col li:last-child{border-bottom:none}
+.do-col li::before{content:'✓ ';color:#6aaa64}
+.dont-col li::before{content:'✗ ';color:#c27070}
+
+/* ── Mark layers ── */
+.layers{max-width:780px;margin-bottom:24px}
+.layer-row{display:flex;gap:14px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)}
+.layer-row:last-child{border-bottom:1px solid var(--silver-dk)}
+.layer-num{font-family:'Cinzel',serif;font-size:10px;color:var(--border);width:16px;flex-shrink:0;padding-top:2px;text-align:right}
+.layer-body{display:flex;flex-direction:column;gap:3px}
+.layer-name{font-size:13px;font-weight:500}
+.layer-spec{font-size:11px;color:var(--border);font-family:'Courier New',monospace}
+.layer-note{font-size:11px;color:var(--rune);line-height:1.5}
+
+/* ── Code block ── */
+.code-block{background:var(--bg3);border:1px solid var(--border);padding:20px 24px;font-family:'Courier New',monospace;font-size:12px;color:#9ab;line-height:1.7;margin-bottom:24px;max-width:660px;overflow-x:auto}
+.code-block .cm{color:var(--border)}
+.code-block .ck{color:var(--silver-dk)}
+.code-block .cv{color:#9ab}
+.code-block .cs{color:#a8c0a0}
+
+/* ── Type specimens ── */
+.type-specimens{display:flex;flex-direction:column;gap:2px;max-width:780px;margin-bottom:24px}
+.specimen{background:var(--surface);border:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.specimen-sample{flex:1}
+.specimen-meta{text-align:right;flex-shrink:0;width:200px}
+.specimen-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rune)}
+.specimen-detail{font-size:11px;color:var(--silver-dk);margin-top:4px;line-height:1.5}
+
+/* ── Vocab table ── */
+.vocab{max-width:660px;margin-bottom:24px}
+.vocab-row{display:grid;grid-template-columns:80px 200px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);align-items:baseline}
+.vocab-row:last-child{border-bottom:none}
+.vocab-use{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-family:'Cinzel',serif}
+.vocab-use.use{color:#6aaa64}.vocab-use.avoid{color:#c27070}
+.vocab-term{font-size:13px;font-weight:500;color:var(--silver-lt)}
+.vocab-note{font-size:12px;color:var(--muted)}
+
+/* ── Component preview ── */
+.component-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:24px;background:var(--surface);border:1px solid var(--border);margin-bottom:2px}
+.component-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rune);width:100px;flex-shrink:0}
+.btn-primary{background:var(--silver);color:var(--bg);border:none;padding:12px 32px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);padding:12px 32px;font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.btn-nav{background:transparent;color:var(--silver);border:1px solid var(--border);padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+
+/* ── Mark showcase ── */
+.mark-showcase{display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;padding:32px;background:var(--surface);border:1px solid var(--border);margin-bottom:24px}
+.mark-item{display:flex;flex-direction:column;align-items:center;gap:10px}
+.mark-sz{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver-dk)}
+
+/* ── Nav preview ── */
+.nav-preview{background:var(--bg2);border:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;max-width:780px}
+.np-logo{display:flex;align-items:center;gap:10px}
+.np-wm{font-family:'Cinzel',serif;font-weight:700;font-size:14px;letter-spacing:.12em;color:var(--silver-lt);text-transform:uppercase}
+.np-wm span{color:var(--silver-dk);font-size:11px;font-weight:400}
+.np-links{display:flex;gap:24px;list-style:none}
+.np-links a{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+
+/* ── Callout box ── */
+.callout{background:var(--surface);border-left:2px solid var(--silver-dk);padding:16px 20px;margin-bottom:24px;max-width:660px}
+.callout p{font-size:13px;color:var(--muted);line-height:1.7}
+.callout strong{color:var(--silver)}
+
+/* ── Tailwind tokens ── */
+.token-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;max-width:780px;margin-bottom:24px}
+.token-row{background:var(--surface);border:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.token-name{font-family:'Courier New',monospace;font-size:12px;color:var(--silver)}
+.token-val{font-family:'Courier New',monospace;font-size:11px;color:var(--muted)}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  main{margin-left:0}
+  .section{padding:48px 32px}
+  .cover{padding:60px 32px}
+  .swatches{grid-template-columns:repeat(3,1fr)}
+  .do-dont{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="28" height="28" viewBox="0 0 108 108" fill="none">
+      <circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="3" fill="none"/>
+      <line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="2" opacity="0.03"/>
+      <line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="2" opacity="0.03"/>
+      <circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="2.5" fill="none"/>
+      <polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/>
+      <polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/>
+      <polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/>
+      <polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/>
+      <line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2.5"/>
+      <line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2.5"/>
+      <line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2.5"/>
+      <line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2.5"/>
+      <circle cx="54" cy="8" r="4.5" fill="#b8bfcc"/>
+      <circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="2" fill="#0c0d0f"/>
+      <circle cx="54" cy="54" r="4" fill="#d4dae6"/>
+    </svg>
+    <div class="sidebar-wordmark">Arel<span>&middot; tools</span></div>
+  </div>
+  <ul class="sidebar-sections">
+    <li class="group">Brand</li>
+    <li><a href="#s1"><span class="num">01</span>Overview</a></li>
+    <li><a href="#s2"><span class="num">02</span>Voice & Tone</a></li>
+    <li class="group">Visual</li>
+    <li><a href="#s3"><span class="num">03</span>Color System</a></li>
+    <li><a href="#s4"><span class="num">04</span>Typography</a></li>
+    <li><a href="#s5"><span class="num">05</span>The Mark</a></li>
+    <li class="group">Product</li>
+    <li><a href="#s6"><span class="num">06</span>Layout & Components</a></li>
+    <li><a href="#s7"><span class="num">07</span>Implementation</a></li>
+    <li><a href="#s8"><span class="num">08</span>Content Structure</a></li>
+    <li class="group">Reference</li>
+    <li><a href="#s9"><span class="num">09</span>Dos & Don'ts</a></li>
+  </ul>
+</nav>
+
+<!-- ── Main ── -->
+<main>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="cover-glow"></div>
+  <svg class="cover-mark" width="480" height="480" viewBox="0 0 108 108" fill="none">
+    <circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="2" fill="none"/>
+    <line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/>
+    <line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/>
+    <circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="1.5" fill="none"/>
+    <polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/>
+    <polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/>
+    <polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/>
+    <polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/>
+    <line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2"/>
+    <line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2"/>
+    <line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2"/>
+    <line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2"/>
+    <circle cx="54" cy="8" r="3.5" fill="#b8bfcc"/>
+    <circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="1.5" fill="#0c0d0f"/>
+    <circle cx="54" cy="54" r="4" fill="#d4dae6"/>
+  </svg>
+  <p class="cover-eyebrow">Arel.tools &nbsp;&middot;&nbsp; Internal Reference</p>
+  <h1 class="cover-title">Brand &<br>Style Guide</h1>
+  <p class="cover-sub">Visual identity, voice, color system, typography, and implementation reference for arel.tools &mdash; www and app.</p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">Version<span>1.0</span></div>
+    <div class="cover-meta-item">Date<span>March 2026</span></div>
+    <div class="cover-meta-item">Stack<span>Tailwind &middot; shadcn/ui</span></div>
+  </div>
+</div>
+
+<!-- ── Section 1: Overview ── -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Brand Overview</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">What is Arel?</div>
+    <p class="body-text">Arel is a suite of web, Discord, and in-game tools for World of Warcraft raid coordination. It handles scheduling, signups, roster management, encounter planning, and attendance tracking &mdash; all connected in a single system.</p>
+    <p class="body-text">The name &ldquo;Arel&rdquo; is a phonetic homonym for <strong>R.L.</strong> &mdash; Raid Lead. The .tools TLD reinforces the functional, no-nonsense nature of the project.</p>
+    <p class="body-text">Arel is a passion project &mdash; built by one raider for the love of the game &amp; the community. It&rsquo;s free to use for up to 8 raids per month. Patreon supporters unlock unlimited raids, automation features, and early access to new tools.</p>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Core Value Proposition</div>
+    <div class="callout"><p><em>One connected system &mdash; from the calendar to the pull.</em><br><br>Schedule raids to collect signups. Signups feed the roster. Roster drives strats. Attendance tracks itself.</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Positioning</div>
+    <table class="kv-table">
+      <tr><td>Audience</td><td>World of Warcraft guilds running regular raid schedules</td></tr>
+      <tr><td>Primary user</td><td>Raid Leads and officers managing signups, rosters, and encounters</td></tr>
+      <tr><td>Secondary user</td><td>Raiders who sign up, check strats, and show up</td></tr>
+      <tr><td>Tone</td><td>Informative, concise, helpful. Warm without being performative. No hype.</td></tr>
+      <tr><td>Differentiator</td><td>Full integration across web, Discord, and in-game &mdash; not a collection of separate tools</td></tr>
+      <tr><td>Model</td><td>Free up to 8 raids/month (2 per week). Patreon supporters get unlimited raids, scheduling automation, and early feature access.</td></tr>
+      <tr><td>Out of scope</td><td>Loot systems (complex, nuanced) &mdash; pair Arel with specialized tools like Gargul and SoftRes.it</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Taglines & Key Phrases</div>
+    <table class="kv-table">
+      <tr><td>Primary tagline</td><td><strong>One connected system &mdash; from the calendar to the pull.</strong></td></tr>
+      <tr><td>Sub-tagline</td><td><strong>Less admin, more action.</strong></td></tr>
+      <tr><td>Descriptor</td><td>Raid Lead Tools</td></tr>
+      <tr><td>Name</td><td>Pronounced Arr Elle &mdash; same as R.L.</td></tr>
+      <tr><td>Domain</td><td>arel.tools</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ── Section 2: Voice & Tone ── -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Voice & Tone</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Principles</div>
+    <p class="body-text">Arel speaks like a fellow raider who built something useful and wants to share it. The tone is <strong>clear, direct, and practical</strong> &mdash; human and personal, not polished or corporate. We write for people who already raid; we show how Arel makes running raids smoother.</p>
+    <p class="body-text">We avoid exaggeration, hype, and dramatic language. We don&rsquo;t glorify the Raid Lead &mdash; the focus is always on outcomes for the raid as a whole.</p>
+    <p class="body-text">Toward supporters, the tone is <strong>appreciative and genuine</strong>. Their support keeps the project going, and that deserves real gratitude. The relationship is warm and community-driven.</p>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Do / Don&rsquo;t</div>
+    <div class="do-dont">
+      <div class="do-col">
+        <div class="col-head">Do</div>
+        <ul>
+          <li>Be concise. Say it in one sentence if you can.</li>
+          <li>Use active voice. &ldquo;Signups feed the roster.&rdquo; Not &ldquo;the roster is populated by signups.&rdquo;</li>
+          <li>Use WoW-native language. Pull, lockout, bench, standby, strats, R.L.</li>
+          <li>Lead with the benefit, not the feature.</li>
+          <li>Trust the user. They know what a roster is.</li>
+          <li>Focus on outcomes for the whole raid.</li>
+          <li>Call Patreon backers &ldquo;supporters.&rdquo;</li>
+          <li>Acknowledge that the project is one person&rsquo;s work &mdash; authenticity is an asset.</li>
+        </ul>
+      </div>
+      <div class="dont-col">
+        <div class="col-head">Don&rsquo;t</div>
+        <ul>
+          <li>Over-glorify the Raid Lead. Avoid &ldquo;the role that holds it all together.&rdquo;</li>
+          <li>Use marketing fluff: revolutionary, powerful, seamless, robust.</li>
+          <li>Be dramatic. &ldquo;The tool your raid deserves&rdquo; is too much.</li>
+          <li>Use exclamation marks in product copy.</li>
+          <li>Explain what a raid is. Assume the reader raids.</li>
+          <li>Use &ldquo;Built by Raiders&rdquo; &mdash; it&rsquo;s forced.</li>
+          <li>Use &ldquo;customer,&rdquo; &ldquo;subscriber,&rdquo; or &ldquo;user plan&rdquo; language for Patreon.</li>
+          <li>Write like a startup. Arel is a passion project &mdash; that&rsquo;s a feature, not a liability.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Vocabulary Reference</div>
+    <div class="vocab">
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">Supporter</span><span class="vocab-note">Anyone backing the project on Patreon. Never &ldquo;customer&rdquo; or &ldquo;subscriber.&rdquo;</span></div>
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">Raid Lead</span><span class="vocab-note">Consistent across all contexts &mdash; never &ldquo;Raid Leader&rdquo;</span></div>
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">Signup</span><span class="vocab-note">Noun, one word</span></div>
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">Strats</span><span class="vocab-note">Casual; use &ldquo;encounter planning&rdquo; in formal context</span></div>
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">Pull</span><span class="vocab-note">Both noun and verb</span></div>
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">Bench</span><span class="vocab-note">On standby for raid. Other statuses include: Tentative, Absent, Late. Standby is acceptable but secondary.</span></div>
+      <div class="vocab-row"><span class="vocab-use use">Use</span><span class="vocab-term">R.L.</span><span class="vocab-note">When referring to the role by initialism</span></div>
+      <div class="vocab-row"><span class="vocab-use avoid">Avoid</span><span class="vocab-term">Built by Raiders</span><span class="vocab-note">Too forced</span></div>
+      <div class="vocab-row"><span class="vocab-use avoid">Avoid</span><span class="vocab-term">Seamless / Powerful / Robust</span><span class="vocab-note">Generic marketing language</span></div>
+      <div class="vocab-row"><span class="vocab-use avoid">Avoid</span><span class="vocab-term">Revolutionary</span><span class="vocab-note">Dramatic and unearned</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Section 3: Color ── -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Color System</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Philosophy</div>
+    <p class="body-text">Dark, steel, and muted. No bright primaries. No decorative gradients. Contrast is achieved through value, not hue. The lightest element (<strong>#D4DAE6</strong>) is the most important and should be used sparingly &mdash; it signals the brightest, most critical point.</p>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Core Palette</div>
+    <div class="swatches">
+      <div class="swatch"><div class="swatch-block" style="background:#0c0d0f;border:1px solid #2a2d36"></div><div class="swatch-info"><div class="swatch-name">App BG</div><div class="swatch-hex">#0C0D0F</div><div class="swatch-role">--bg</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#1a1d24"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#1A1D24</div><div class="swatch-role">--surface</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#2a2d36"></div><div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-hex">#2A2D36</div><div class="swatch-role">--border</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#7a8499"></div><div class="swatch-info"><div class="swatch-name">Rune</div><div class="swatch-hex">#7A8499</div><div class="swatch-role">--rune</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#8a909e"></div><div class="swatch-info"><div class="swatch-name">Muted</div><div class="swatch-hex">#8A909E</div><div class="swatch-role">--muted</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#6e7585"></div><div class="swatch-info"><div class="swatch-name">Silver Dk</div><div class="swatch-hex">#6E7585</div><div class="swatch-role">--silver-dk</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#b8bfcc"></div><div class="swatch-info"><div class="swatch-name">Silver</div><div class="swatch-hex">#B8BFCC</div><div class="swatch-role">--silver</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#d4dae6"></div><div class="swatch-info"><div class="swatch-name">Silver Lt</div><div class="swatch-hex">#D4DAE6</div><div class="swatch-role">--silver-lt</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#e8ecf2"></div><div class="swatch-info"><div class="swatch-name">Text</div><div class="swatch-hex">#E8ECF2</div><div class="swatch-role">--text</div></div></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Usage Rules</div>
+    <table class="kv-table">
+      <tr><td>Page background</td><td>#0C0D0F &mdash; --bg</td></tr>
+      <tr><td>Card / panel bg</td><td>#1A1D24 &mdash; --surface</td></tr>
+      <tr><td>All borders</td><td>#2A2D36 &mdash; --border &mdash; 1px solid</td></tr>
+      <tr><td>Body text</td><td>#E8ECF2 &mdash; --text</td></tr>
+      <tr><td>Secondary text</td><td>#8A909E &mdash; --muted</td></tr>
+      <tr><td>Labels / eyebrows</td><td>#7A8499 &mdash; --rune or --silver-dk</td></tr>
+      <tr><td>Emphasis / active</td><td>#D4DAE6 &mdash; --silver-lt &mdash; use sparingly</td></tr>
+      <tr><td>Interactive UI</td><td>#B8BFCC &mdash; --silver</td></tr>
+      <tr><td>No pure white</td><td>Never use #FFFFFF as text or bg in the dark theme</td></tr>
+      <tr><td>No color accents</td><td>No reds, blues, greens for UI chrome. Functional states only.</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Tailwind Token Mapping</div>
+    <div class="code-block"><span class="cm">// tailwind.config.js</span>
+<span class="ck">colors</span>: {
+  <span class="ck">arel</span>: {
+    <span class="ck">bg</span>:        <span class="cs">'#0C0D0F'</span>,
+    <span class="ck">bg2</span>:       <span class="cs">'#111317'</span>,
+    <span class="ck">bg3</span>:       <span class="cs">'#161820'</span>,
+    <span class="ck">surface</span>:   <span class="cs">'#1A1D24'</span>,
+    <span class="ck">border</span>:    <span class="cs">'#2A2D36'</span>,
+    <span class="ck">rune</span>:      <span class="cs">'#7A8499'</span>,
+    <span class="ck">muted</span>:     <span class="cs">'#8A909E'</span>,
+    <span class="ck">silver</span>: {
+      <span class="ck">dk</span>:        <span class="cs">'#6E7585'</span>,
+      <span class="ck">DEFAULT</span>:   <span class="cs">'#B8BFCC'</span>,
+      <span class="ck">lt</span>:        <span class="cs">'#D4DAE6'</span>,
+    },
+    <span class="ck">text</span>:      <span class="cs">'#E8ECF2'</span>,
+  }
+},
+<span class="ck">borderRadius</span>: { DEFAULT: <span class="cs">'0'</span>, sm: <span class="cs">'0'</span>, md: <span class="cs">'0'</span>, lg: <span class="cs">'0'</span> },</div>
+  </div>
+</section>
+
+<!-- ── Section 4: Typography ── -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Typography</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Typefaces</div>
+    <table class="kv-table">
+      <tr><td>Display / Wordmark</td><td><strong>Cinzel</strong> &mdash; serif. Used for brand name, section labels, feature titles, step numbers, and all uppercase display text. Weights: 400, 600, 700, 900.</td></tr>
+      <tr><td>Body / UI</td><td><strong>DM Sans</strong> &mdash; sans-serif. Used for all body copy, navigation links, buttons, descriptions, and interface text. Weights: 300, 400, 500.</td></tr>
+      <tr><td>Google Fonts</td><td>Cinzel:wght@400;600;700;900 &nbsp;&middot;&nbsp; DM+Sans:wght@300;400;500</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Type Scale — Specimens</div>
+    <div class="type-specimens">
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-family:'Cinzel',serif;font-weight:900;font-size:48px;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(150deg,#e8ecf2 30%,#7a8499 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">AREL</span></div>
+        <div class="specimen-meta"><div class="specimen-label">H1 / Brand</div><div class="specimen-detail">Cinzel 900<br>clamp(48px, 8vw, 96px)<br>letter-spacing .06em<br>uppercase + gradient</div></div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-family:'Cinzel',serif;font-weight:700;font-size:32px;color:#d4dae6;line-height:1">Less admin, more action.</span></div>
+        <div class="specimen-meta"><div class="specimen-label">H2 / Section</div><div class="specimen-detail">Cinzel 700<br>clamp(28px, 3vw, 40px)</div></div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-family:'Cinzel',serif;font-weight:600;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#d4dae6">Scheduling &amp; Signup</span></div>
+        <div class="specimen-meta"><div class="specimen-label">H3 / Feature</div><div class="specimen-detail">Cinzel 600<br>16px<br>letter-spacing .08em<br>uppercase</div></div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#7a8499;font-family:'DM Sans',sans-serif">Raid Lead Tools &nbsp;&middot;&nbsp; Less admin, more action</span></div>
+        <div class="specimen-meta"><div class="specimen-label">Eyebrow</div><div class="specimen-detail">DM Sans 400<br>11px<br>letter-spacing .3em<br>uppercase</div></div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8a909e;font-family:'DM Sans',sans-serif">Scheduling &amp; Signup &nbsp;&middot;&nbsp; Roster &nbsp;&middot;&nbsp; In-Game &nbsp;&middot;&nbsp; Attendance</span></div>
+        <div class="specimen-meta"><div class="specimen-label">Nav Links</div><div class="specimen-detail">DM Sans 400<br>13px<br>letter-spacing .08em<br>uppercase</div></div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-size:15px;color:#8a909e;font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.8">Arel handles the logistics so your team can focus on the fight. Signups feed the roster. Attendance tracks itself.</span></div>
+        <div class="specimen-meta"><div class="specimen-label">Body</div><div class="specimen-detail">DM Sans 300<br>14–15px<br>line-height 1.7–1.8</div></div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-sample"><span style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:500;color:#0c0d0f;background:#b8bfcc;padding:12px 28px;display:inline-block">Early Access</span></div>
+        <div class="specimen-meta"><div class="specimen-label">Button</div><div class="specimen-detail">DM Sans 500<br>13px<br>letter-spacing .1em<br>uppercase</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Rules</div>
+    <p class="body-text">Cinzel is always uppercase or title case &mdash; never lowercase.</p>
+    <p class="body-text">Letter-spacing on uppercase Cinzel text: minimum .08em for feature titles, up to .4em for eyebrows and micro-labels.</p>
+    <p class="body-text">DM Sans body text uses weight 300. Use 400&ndash;500 for UI labels and buttons only.</p>
+    <p class="body-text">No italic DM Sans. Italics in the UI use <code style="font-size:12px;color:#9ab;background:var(--bg3);padding:1px 5px">&lt;em&gt;</code> styled as <code style="font-size:12px;color:#9ab;background:var(--bg3);padding:1px 5px">font-style:normal</code> with a distinct color (--silver-lt or --silver-dk).</p>
+  </div>
+</section>
+
+<!-- ── Section 5: The Mark ── -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">The Mark</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Name & Construction</div>
+    <p class="body-text"><strong>B3 Iron Sight.</strong> Built entirely in SVG using a 108&times;108 viewBox. All elements are circles, polygons, and lines &mdash; no paths. Scale via width/height attributes only. Maintain 1:1 aspect ratio.</p>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">At Every Size</div>
+    <div class="mark-showcase">
+      <div class="mark-item">
+        <svg width="128" height="128" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="2" fill="none"/><line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/><line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/><circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="1.5" fill="none"/><polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/><polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/><polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/><polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/><line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2"/><line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2"/><line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2"/><line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2"/><circle cx="54" cy="8" r="3.5" fill="#b8bfcc"/><circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="1.5" fill="#0c0d0f"/><circle cx="54" cy="54" r="4" fill="#d4dae6"/></svg>
+        <span class="mark-sz">128px</span>
+      </div>
+      <div class="mark-item">
+        <svg width="96" height="96" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="2" fill="none"/><line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/><line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/><circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="1.5" fill="none"/><polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/><polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/><polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/><polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/><line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2"/><line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2"/><line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2"/><line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2"/><circle cx="54" cy="8" r="3.5" fill="#b8bfcc"/><circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="1.5" fill="#0c0d0f"/><circle cx="54" cy="54" r="4" fill="#d4dae6"/></svg>
+        <span class="mark-sz">96px</span>
+      </div>
+      <div class="mark-item">
+        <svg width="64" height="64" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="2" fill="none"/><line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/><line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="1.5" opacity="0.03"/><circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="1.5" fill="none"/><polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/><polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/><polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/><polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/><line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2"/><line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2"/><line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2"/><line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2"/><circle cx="54" cy="8" r="3.5" fill="#b8bfcc"/><circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="1.5" fill="#0c0d0f"/><circle cx="54" cy="54" r="4" fill="#d4dae6"/></svg>
+        <span class="mark-sz">64px</span>
+      </div>
+      <div class="mark-item">
+        <svg width="36" height="36" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="3" fill="none"/><line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="2" opacity="0.03"/><line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="2" opacity="0.03"/><circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="2.5" fill="none"/><polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/><polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/><polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/><polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/><line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2.5"/><line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2.5"/><line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2.5"/><line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2.5"/><circle cx="54" cy="8" r="4.5" fill="#b8bfcc"/><circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="2" fill="#0c0d0f"/><circle cx="54" cy="54" r="4" fill="#d4dae6"/></svg>
+        <span class="mark-sz">36px</span>
+      </div>
+      <div class="mark-item">
+        <svg width="24" height="24" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="46" stroke="#2a2d36" stroke-width="7" fill="none"/><circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="5" fill="none"/><polygon points="54,4 63,38 54,52 45,38" fill="#d4dae6"/><polygon points="54,104 59,68 54,54 49,68" fill="#2e3240"/><polygon points="104,54 68,59 54,54 68,49" fill="#2e3240"/><polygon points="4,54 40,59 54,54 40,49" fill="#2a2d36"/><circle cx="54" cy="4" r="5" fill="#d4dae6"/><circle cx="54" cy="54" r="13" fill="#0c0d0f"/><circle cx="54" cy="54" r="7" fill="#d4dae6"/></svg>
+        <span class="mark-sz">24px</span>
+      </div>
+      <div class="mark-item">
+        <svg width="16" height="16" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="44" stroke="#2a2d36" stroke-width="10" fill="none"/><polygon points="54,2 65,40 54,56 43,40" fill="#d4dae6"/><circle cx="54" cy="2" r="6" fill="#d4dae6"/><circle cx="54" cy="54" r="16" fill="#0c0d0f"/><circle cx="54" cy="54" r="9" fill="#d4dae6"/></svg>
+        <span class="mark-sz">16px</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Layer Order — Bottom to Top</div>
+    <div class="layers">
+      <div class="layer-row"><span class="layer-num">1</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#4a5068">Outer ring</span><span class="layer-spec">#232630 &middot; 2px stroke</span></div><div class="layer-note">Containing boundary. Everything renders inside this.</div></div></div>
+      <div class="layer-row"><span class="layer-num">2</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#4a5068">Diagonals</span><span class="layer-spec">white &middot; 3% opacity</span></div><div class="layer-note">Ghost X across full diameter. Below all solid shapes.</div></div></div>
+      <div class="layer-row"><span class="layer-num">3</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#5a6278">Inner ring</span><span class="layer-spec">#3A4055 &middot; 1.5px stroke</span></div><div class="layer-note">Frames the center. Sits above the diagonals.</div></div></div>
+      <div class="layer-row"><span class="layer-num">4</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#6e7585">E / W / S blades</span><span class="layer-spec">#2E3240 – #3A4055</span></div><div class="layer-note">Three receding cardinal arms. Drawn before N so N wins any overlap.</div></div></div>
+      <div class="layer-row"><span class="layer-num">5</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#9aa0b0">N blade</span><span class="layer-spec">#7A8499</span></div><div class="layer-note">Hero arm. Drawn after E/W/S so it always renders on top.</div></div></div>
+      <div class="layer-row"><span class="layer-num">6</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#6e7585">Ordinal ticks</span><span class="layer-spec">#2A2D36 &middot; 2px</span></div><div class="layer-note">Four corner marks at the outer ring.</div></div></div>
+      <div class="layer-row"><span class="layer-num">7</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#b8bfcc">N dot</span><span class="layer-spec">#B8BFCC &middot; r3.5</span></div><div class="layer-note">North marker on the outer ring edge.</div></div></div>
+      <div class="layer-row"><span class="layer-num">8</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#6e7585">Center ring</span><span class="layer-spec">#6E7585 &middot; 1.5px stroke</span></div><div class="layer-note">Small stroke circle enclosing the center point.</div></div></div>
+      <div class="layer-row"><span class="layer-num">9</span><div class="layer-body"><div class="lr-top" style="display:flex;gap:10px;align-items:baseline"><span class="layer-name" style="color:#d4dae6">Center dot</span><span class="layer-spec">#D4DAE6 &middot; r4</span></div><div class="layer-note">Brightest point. Drawn last &mdash; nothing covers it.</div></div></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Don&rsquo;ts</div>
+    <p class="body-text">Do not recolor the N blade or center dot. Do not remove the outer ring. Do not add cardinal lines. Do not stretch from 1:1 ratio. Do not place on mid-gray without applying the mid-tone color variant.</p>
+  </div>
+</section>
+
+<!-- ── Section 6: Layout & Components ── -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Layout & Components</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Grid & Spacing</div>
+    <table class="kv-table">
+      <tr><td>Max content width</td><td>1100px</td></tr>
+      <tr><td>Page padding</td><td>48px horizontal &mdash; 24px on mobile</td></tr>
+      <tr><td>Background grid</td><td>48&times;48px at 3% opacity &mdash; structural texture, not decoration</td></tr>
+      <tr><td>Section spacing</td><td>120px between major sections</td></tr>
+      <tr><td>Card gap</td><td>2px between feature cards &mdash; tight gap is intentional</td></tr>
+      <tr><td>Border radius</td><td>0 everywhere &mdash; no rounded corners in core UI</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Navigation — Live Preview</div>
+    <div class="nav-preview">
+      <div class="np-logo">
+        <svg width="28" height="28" viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="48" stroke="#232630" stroke-width="3" fill="none"/><line x1="14" y1="14" x2="94" y2="94" stroke="#ffffff" stroke-width="2" opacity="0.03"/><line x1="94" y1="14" x2="14" y2="94" stroke="#ffffff" stroke-width="2" opacity="0.03"/><circle cx="54" cy="54" r="18" stroke="#3a4055" stroke-width="2.5" fill="none"/><polygon points="54,8 57.5,38 54,46 50.5,38" fill="#7a8499"/><polygon points="54,100 56.5,72 54,66 51.5,72" fill="#3a4055"/><polygon points="100,54 72,56.5 66,54 72,51.5" fill="#3a4055"/><polygon points="8,54 36,56.5 42,54 36,51.5" fill="#2e3240"/><line x1="88" y1="20" x2="82" y2="26" stroke="#2a2d36" stroke-width="2.5"/><line x1="88" y1="88" x2="82" y2="82" stroke="#2a2d36" stroke-width="2.5"/><line x1="20" y1="88" x2="26" y2="82" stroke="#2a2d36" stroke-width="2.5"/><line x1="20" y1="20" x2="26" y2="26" stroke="#2a2d36" stroke-width="2.5"/><circle cx="54" cy="8" r="4.5" fill="#b8bfcc"/><circle cx="54" cy="54" r="9" stroke="#6e7585" stroke-width="2" fill="#0c0d0f"/><circle cx="54" cy="54" r="4" fill="#d4dae6"/></svg>
+        <div class="np-wm">Arel <span>&middot; tools</span></div>
+      </div>
+      <ul class="np-links">
+        <li><a href="#">Scheduling &amp; Signup</a></li>
+        <li><a href="#">Roster</a></li>
+        <li><a href="#">In-Game</a></li>
+        <li><a href="#">Attendance</a></li>
+      </ul>
+      <button class="btn-nav">Early Access</button>
+    </div>
+    <table class="kv-table">
+      <tr><td>Position</td><td>Fixed top, full-width, gradient fade to transparent, backdrop-filter blur(2px)</td></tr>
+      <tr><td>Logo</td><td>Mark (36px) + wordmark left-aligned</td></tr>
+      <tr><td>Nav items</td><td>Scheduling &amp; Signup &middot; Roster &middot; In-Game &middot; Attendance</td></tr>
+      <tr><td>CTA</td><td>&ldquo;Early Access&rdquo; &mdash; ghost button, top right</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Buttons — Live Preview</div>
+    <div class="component-row"><span class="component-label">Primary</span><button class="btn-primary">Early Access</button></div>
+    <div class="component-row"><span class="component-label">Secondary</span><button class="btn-secondary">Preview Tools</button></div>
+    <div class="component-row"><span class="component-label">Nav CTA</span><button class="btn-nav">Early Access</button></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Cards</div>
+    <p class="body-text">Feature cards: --surface bg, 1px --border, 40px 36px padding. On hover: border becomes --silver-dk, bg becomes --bg3, and a top-edge gradient highlight appears. <strong>No drop shadows</strong> &mdash; hover state is border-based only.</p>
+  </div>
+</section>
+
+<!-- ── Section 7: Implementation ── -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2 class="section-title">Implementation</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Tech Stack</div>
+    <table class="kv-table">
+      <tr><td>Styling</td><td>Tailwind CSS &mdash; extend theme with Arel color tokens (see Section 3)</td></tr>
+      <tr><td>Components</td><td>shadcn/ui &mdash; override default theme with Arel tokens</td></tr>
+      <tr><td>Fonts</td><td>Google Fonts: Cinzel + DM Sans, or self-hosted for performance</td></tr>
+      <tr><td>Icons</td><td>Lucide &mdash; consistent with shadcn/ui. Use sparingly; the SVG mark and custom feature icons are the primary visual language.</td></tr>
+      <tr><td>Discord</td><td>Discord bot for signups, reminders, and roster sync</td></tr>
+      <tr><td>In-game</td><td>WoW addon(s) surfacing roster, strats, and callouts</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">shadcn/ui — globals.css</div>
+    <div class="code-block"><span class="cm">/* globals.css — dark theme override */</span>
+<span class="ck">:root</span> {
+  <span class="ck">--background</span>:           <span class="cs">12 13 15</span>;      <span class="cm">/* #0C0D0F */</span>
+  <span class="ck">--foreground</span>:           <span class="cs">232 236 242</span>;  <span class="cm">/* #E8ECF2 */</span>
+  <span class="ck">--card</span>:                 <span class="cs">26 29 36</span>;      <span class="cm">/* #1A1D24 */</span>
+  <span class="ck">--card-foreground</span>:      <span class="cs">232 236 242</span>;
+  <span class="ck">--border</span>:               <span class="cs">42 45 54</span>;      <span class="cm">/* #2A2D36 */</span>
+  <span class="ck">--muted</span>:                <span class="cs">26 29 36</span>;
+  <span class="ck">--muted-foreground</span>:     <span class="cs">138 144 158</span>;  <span class="cm">/* #8A909E */</span>
+  <span class="ck">--primary</span>:              <span class="cs">184 191 204</span>;  <span class="cm">/* #B8BFCC */</span>
+  <span class="ck">--primary-foreground</span>:   <span class="cs">12 13 15</span>;
+  <span class="ck">--radius</span>:               <span class="cs">0rem</span>;          <span class="cm">/* No border radius */</span>
+}</div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">www vs. App</div>
+    <table class="kv-table">
+      <tr><td>www (marketing)</td><td>Full visual weight. Hero mark at 80px. Cinzel display type. Animated fade-ins. Background grid texture. Reference: arel-tools-brand.html</td></tr>
+      <tr><td>app (product UI)</td><td>Restrained. Mark in nav only. Cinzel for page/section titles only. DM Sans for all UI. shadcn/ui components with Arel theming. Density over decoration.</td></tr>
+      <tr><td>Shared</td><td>Color tokens, border-radius (0), button styles, spacing scale, type scale.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ── Section 8: Content Structure ── -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h2 class="section-title">Content Structure</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Product Areas — Navigation Order</div>
+    <table class="kv-table">
+      <tr><td>Scheduling &amp; Signup</td><td>Post raid nights, set lockout windows, collect signups via web or Discord</td></tr>
+      <tr><td>Roster</td><td>Manage specs, roles, availability; auto-populated from signups</td></tr>
+      <tr><td>In-Game</td><td>WoW addons and Discord bot integration</td></tr>
+      <tr><td>Attendance</td><td>Track who shows, who benches, who goes standby; history per raider</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">CTAs</div>
+    <table class="kv-table">
+      <tr><td>Primary</td><td><strong>Try it Free</strong> &mdash; primary button</td></tr>
+      <tr><td>Secondary</td><td><strong>Support on Patreon</strong> &mdash; secondary ghost button</td></tr>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">How It Works — Four-Step Flow</div>
+    <table class="kv-table">
+      <tr><td>I</td><td><strong>Schedule &amp; Collect Signups</strong> &mdash; Post the raid night. Raiders sign up via Discord or web. Reminders go out automatically.</td></tr>
+      <tr><td>II</td><td><strong>Set the Roster</strong> &mdash; Signups populate your roster. Adjust roles, swap benches, confirm your 20.</td></tr>
+      <tr><td>III</td><td><strong>Plan Encounters</strong> &mdash; Share the encounter strat and assign individual roles. Shared with the raid before the pull &mdash; accessible on the web and in-game via addon.</td></tr>
+      <tr><td>IV</td><td><strong>Pull. Track. Repeat.</strong> &mdash; Attendance is tracked via WCL logs. History stays on each raider. Next week starts where this one left off.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ── Section 9: Dos & Don'ts ── -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h2 class="section-title">Quick Reference</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Dos & Don&rsquo;ts</div>
+    <div class="do-dont">
+      <div class="do-col">
+        <div class="col-head">Do</div>
+        <ul>
+          <li>Use Cinzel for display and labels only</li>
+          <li>Keep border-radius at 0</li>
+          <li>Use --silver-lt sparingly for emphasis</li>
+          <li>Write benefit-first copy</li>
+          <li>Use WoW-native vocabulary</li>
+          <li>Scale the mark via viewBox only</li>
+          <li>Use 2px tight card gaps</li>
+          <li>Keep hover state border-based, no shadows</li>
+          <li>Use DM Sans 300 for body text</li>
+          <li>Keep the N blade at #7A8499</li>
+          <li>Use active voice in all copy</li>
+          <li>Call Patreon backers &ldquo;supporters&rdquo;</li>
+          <li>Let the passion-project nature show in the voice</li>
+        </ul>
+      </div>
+      <div class="dont-col">
+        <div class="col-head">Don&rsquo;t</div>
+        <ul>
+          <li>Use Cinzel for body or paragraph text</li>
+          <li>Add rounded corners anywhere</li>
+          <li>Use pure white (#FFF) in the dark theme</li>
+          <li>Lead with features over outcomes</li>
+          <li>Over-explain raiding to the audience</li>
+          <li>Stretch or distort the mark</li>
+          <li>Use large gutters between feature cards</li>
+          <li>Add drop shadows to cards or UI</li>
+          <li>Use exclamation marks in product copy</li>
+          <li>Recolor any mark elements</li>
+          <li>Use &ldquo;Built by Raiders&rdquo; or &ldquo;revolutionary&rdquo;</li>
+          <li>Use &ldquo;customer,&rdquo; &ldquo;subscriber,&rdquo; or startup-speak</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer style="border-top:1px solid var(--border);padding:40px 80px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1">
+  <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver-dk)">Arel &middot; Tools</div>
+  <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--rune)">Brand & Style Guide &nbsp;&middot;&nbsp; v1.0 &nbsp;&middot;&nbsp; March 2026</div>
+</footer>
+
+</main>
+
+<script>
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('section[id], .cover');
+const links = document.querySelectorAll('.sidebar-sections a');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector('.sidebar-sections a[href="#' + e.target.id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
