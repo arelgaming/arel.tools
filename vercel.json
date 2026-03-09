@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm turbo build --filter=@repo/www",
+  "outputDirectory": "apps/www/dist",
+  "installCommand": "pnpm install",
+  "framework": null
+}
