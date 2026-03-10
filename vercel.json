@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm turbo build --filter=@repo/www",
-  "outputDirectory": "apps/www/dist",
+  "buildCommand": "pnpm turbo build --filter=@repo/www && cp -r apps/www/dist dist",
+  "outputDirectory": "dist",
   "installCommand": "pnpm install",
   "framework": null
 }
